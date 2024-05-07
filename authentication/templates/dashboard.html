@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hockey League Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .navbar {
+            background-color: #fff;
+        }
+        .navbar-brand img {
+            height: 40px;
+        }
+        body {
+            padding-top: 56px;
+            background: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            left: 0;
+            top: 56px;
+            bottom: 0;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            color: #337ab7;
+            text-decoration: none;
+            text-align: left;
+            padding: 10px;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            color: #23527c;
+            background-color: #e9ecef;
+        }
+        .content {
+            padding-left: 250px;
+            padding-top: 20px;
+        }
+        .chart-container {
+            padding: 15px;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        select, .go-back-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .team-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .team-info img {
+            max-width: 100px; /* Adjust the size as needed */
+            height: auto;
+            margin: 20px 0; /* Centers the image vertically and provides some spacing */
+        }
+        @media (max-width: 768px) {
+           .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+            }
+           .content {
+                padding-left: 0;
+                padding-top: 0;
+            }
+            h1 {
+                margin-top: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:history.back()">Back</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="sidebar">
+        <a href="{% url 'dashboard' %}" class="btn btn-light btn-block">Team Visualization</a>
+        <a href="{% url 'stats_page' %}" class="btn btn-light btn-block">Team Comparison</a>
+        <a href="{% url 'game_metrics' %}" class="btn btn-light btn-block">Metric Comparison</a>
+    </div>
+
+    <div class="container-fluid content">
+        <div class="container">
+            <h1>Team Visualization Dashboard</h1>
+            <select id="teamSelector" onchange="loadTeamData()">
+                <option value="">Select a Team</option>
+                {% for team in teams %}
+                <option value="{{ team.id }}">{{ team.name }}</option>
+                {% endfor %}
+            </select>
+            <button class="go-back-btn hidden" onclick="goBack()">Go Back to Select Team</button>
+            <div class="team-info">
+                <img id="teamLogo" src="" alt="Team Logo" class="hidden">
+            </div>
+            <div class="row">
+                <div class="col-md-6 chart-container">
+                    <canvas id="goalChart"></canvas>
+                </div>
+                <div class="col-md-6 chart-container">
+                    <canvas id="possessionChart"></canvas>
+                </div>
+                <div class="col-md-6 chart-container">
+                    <canvas id="circleChart"></canvas>
+                </div>
+                <div class="col-md-6 chart-container">
+                    <canvas id="shotsChart"></canvas>
+                </div>
+                <div class="col-md-6 chart-container">
+                    <canvas id="cardChart"></canvas>
+                </div>
+                <div class="col-md-6 chart-container">
+                    <canvas id="pcChart"></canvas>
+                </div>
+                <div class="col-md-6 chart-container">
+                    <canvas id="psChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadTeamData() {
+            const teamId = document.getElementById('teamSelector').value;
+            if (!teamId) return;
+            document.getElementById('teamSelector').classList.add('hidden');
+            document.querySelector('.go-back-btn').classList.remove('hidden');
+            fetch(`/team/${teamId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const chartColors = ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)', 'rgba(199, 199, 199, 0.8)'];
+                    const chartsConfig = [
+                        { id: 'goalChart', label: 'Total Goals', data: data.goal_chart },
+                        { id: 'possessionChart', label: 'Possession Percentage', data: data.possession_chart },
+                        { id: 'circleChart', label: 'Circle Entries', data: data.circle_chart },
+                        { id: 'shotsChart', label: 'Shots', data: data.shots_chart },
+                        { id: 'cardChart', label: 'Cards', data: data.card_chart },
+                        { id: 'pcChart', label: 'Penalty Corners', data: data.pc_chart },
+                        { id: 'psChart', label: 'Penalty Strokes', data: data.ps_chart }
+                    ];
+                    chartsConfig.forEach((config, index) => {
+                        const ctx = document.getElementById(config.id).getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: config.data.labels,
+                                datasets: [{
+                                    label: config.label,
+                                    data: config.data.data,
+                                    backgroundColor: chartColors[index],
+                                    borderColor: chartColors[index].replace('0.8', '1'),
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    });
+
+                    // Update team info
+                    document.getElementById('teamLogo').src = data.team.logo;
+                    document.getElementById('teamLogo').classList.remove('hidden');
+                });
+        }
+
+        function goBack() {
+            document.getElementById('teamSelector').classList.remove('hidden');
+            document.querySelector('.go-back-btn').classList.add('hidden');
+            document.getElementById('teamLogo').classList.add('hidden');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

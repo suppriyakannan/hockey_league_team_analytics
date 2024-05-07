@@ -1,0 +1,202 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Data Visualization</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<style>
+            .navbar-brand img {
+            height: 40px;
+        }
+#legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#legend-White Warriorz span { background-color: #e6f7ff; }  
+#legend-Blue Blazerz span { background-color: #f0e6ff; }   
+#legend-Green Griffinz span { background-color: #e6ffe6; } 
+#legend-Yellow Yakz span { background-color: #fffbe6; }     
+#legend-Red Ruffianz span { background-color: #ffe6e6; }    
+#legend-Violet Whalez span { background-color: #f5e6ff; }   
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.legend-item span {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    margin-right: 5px;
+}
+
+.navbar-brand img {
+            height: 40px;
+        }
+
+        body {
+            padding-top: 80px; /* Padding to account for fixed navbar */
+        }
+        .accordion-button::after {
+            position: absolute;
+            right: 20px; /* Position the arrow to the right */
+        }
+        .accordion-button:not(.collapsed) {
+            color: #0d6efd;
+            background-color: #e9ecef;
+        }
+        canvas {
+            height: 49vh; /* Adjust if needed to fit within accordion content */
+            width: 100%; /* Full width to fit the container */
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="{%url 'home'%}">
+            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:history.back()">Back</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container-fluid mt-5">
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div id="sidebar">
+                    <div class="list-group">
+                        <a href="{% url 'visualize' %}" class="list-group-item list-group-item-action active">Main Dashboard</a>
+                        <a href="{% url 'matchspecs' %}" class="list-group-item list-group-item-action">Match Specific</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div id="content">
+                    <div class="container mt-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="legend">
+                                    <div class="legend-item" id="legend-White Warriorz"><span></span>White Warriorz</div>
+                                    <div class="legend-item" id="legend-Blue Blazerz"><span></span>Blue Blazerz</div>
+                                    <div class="legend-item" id="legend-Green Griffinz"><span></span>Green Griffinz</div>
+                                    <div class="legend-item" id="legend-Yellow Yakz"><span></span>Yellow Yakz</div>
+                                    <div class="legend-item" id="legend-Red Ruffianz"><span></span>Red Ruffianz</div>
+                                    <div class="legend-item" id="legend-Violet Whalez"><span></span>Violet Whalez</div>
+                                </div>
+                                                                                                
+                            </div>
+                        </div>
+                    </div>
+                    
+            
+                    <div id="accordion">
+                        <div class="card">
+                            <div class="card-header" id="headingOne">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link accordion-button" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        Goal Chart
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                                <div class="card-body">
+                                    <canvas id="goalChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingTwo">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link accordion-button collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Possession Chart
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                                <div class="card-body">
+                                    <canvas id="possessionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingThree">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link accordion-button collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        Card Chart
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                                <div class="card-body">
+                                    <canvas id="cardChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingFour">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link accordion-button collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                        Circle Penetration Chart
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+                                <div class="card-body">
+                                    <canvas id="circleChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingFive">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link accordion-button collapsed" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                        Penalty Chart
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+                                <div class="card-body">
+                                    <canvas id="penaltyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Other HTML elements -->
+
+<script src="{% static 'js/charts.js' %}?v=1.03"></script>  <!-- Notice the version bump to ensure no cache issues -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

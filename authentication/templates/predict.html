@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Predict Match Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        label, input, button { display: block; margin: 10px 0; }
+        input, button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Predict Match Result</h1>
+    <form method="POST" action="/predict_result/">
+        {% csrf_token %}
+        <label for="possession_percentage">Possession Percentage:</label>
+        <input type="number" id="possession_percentage" name="possession_percentage" step="0.01">
+
+        <label for="circle_count">Circle Count:</label>
+        <input type="number" id="circle_count" name="circle_count">
+
+        <label for="shots_count">Shots Count:</label>
+        <input type="number" id="shots_count" name="shots_count">
+
+        <label for="field_goal">Field Goal:</label>
+        <input type="number" id="field_goal" name="field_goal">
+
+        <label for="penalty_goal">Penalty Goal:</label>
+        <input type="number" id="penalty_goal" name="penalty_goal">
+
+        <label for="penalty_corners">Penalty Corners:</label>
+        <input type="number" id="penalty_corners" name="penalty_corners">
+
+        <label for="penalty_strokes">Penalty Strokes:</label>
+        <input type="number" id="penalty_strokes" name="penalty_strokes">
+
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>

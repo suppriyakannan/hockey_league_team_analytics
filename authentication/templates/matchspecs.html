@@ -1,0 +1,468 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Specific Visualization</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        .navbar-brand img {
+            height: 40px;
+        }
+        body {
+            padding-top: 80px;
+        }
+        .accordion-button::after {
+            position: absolute;
+            right: 20px;
+        }
+        .accordion-button:not(.collapsed) {
+            color: #0d6efd;
+            background-color: #e9ecef;
+        }
+        canvas {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding-top: 56px; /* Adjust padding for smaller screens */
+            }
+            .heading-gap {
+                margin-top: 20px; /* Add margin between sidebar and heading */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="{% url 'home'%}">
+            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'visualize' %}">Back</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-md-3">
+                <div id="sidebar">
+                    <div class="list-group">
+                        <a href="{% url 'visualize' %}" class="list-group-item list-group-item-action">Main Dashboard</a>
+                        <a href="{% url 'matchspecs' %}" class="list-group-item list-group-item-action active">Match Specific</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div id="content">
+                    <div class="container-fluid">
+                        <h2 class="heading-gap">Match Specific Visualization</h2>
+                        <form id="matchForm">
+                            <div class="form-group">
+                                <label for="matchNumber">Select Match Number:</label>
+                                <select class="form-control" id="matchNumber" name="matchNumber" required>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                        <button id="goBackBtn" class="btn btn-secondary mt-3" style="display:none;">Go Back to Select Match</button>
+                    </div>
+                    <div id="chartsContainer" class="container-fluid" style="display:none;">
+                        <div class="row" id="goalChartRow">
+                            <div class="col">
+                                <canvas id="goalChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="row" id="possessionChartRow">
+                            <div class="col">
+                                <canvas id="possessionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="row" id="circleShotsChartRow">
+                            <div class="col">
+                                <canvas id="circleShotsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="row" id="pcPsChartRow">
+                            <div class="col">
+                                <canvas id="pcPsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="row" id="cardChartRow">
+                            <div class="col">
+                                <canvas id="cardChart"></canvas>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div>    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        populateMatchOptions();
+        document.getElementById('matchForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const matchNumber = document.getElementById('matchNumber').value;
+            fetchAndRenderCharts(matchNumber);
+            document.getElementById('matchForm').style.display = 'none';
+            document.getElementById('goBackBtn').style.display = 'block';
+            document.getElementById('chartsContainer').style.display = 'block';
+        });
+        document.getElementById('goBackBtn').addEventListener('click', function () {
+            // Reload the page when the button is clicked
+            location.reload();
+        });
+    });
+
+        function populateMatchOptions() {
+            fetch('/api/max_match_number/')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('matchNumber');
+                    for (let i = 1; i <= data.max_match_number; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `Match ${i}`;
+                        select.appendChild(option);
+                    }
+                })
+                .catch(error => console.error('Error fetching match numbers:', error));
+        }
+
+        function fetchAndRenderCharts(matchNumber) {
+    fetch(`/api/goals/${matchNumber}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('goalChart').style.display = 'none';
+            } else if (data.length > 0) {
+                renderGoalChart(data);
+                document.getElementById('goalChart').style.display = 'block';
+            } else {
+                document.getElementById('goalChart').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching goal data:', error);
+            document.getElementById('goalChart').style.display = 'none';
+        });
+
+    fetch(`/api/possession/${matchNumber}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('possessionChart').style.display = 'none';
+            } else if (Object.keys(data).length > 0) {
+                renderPossessionChart(data);
+                document.getElementById('possessionChart').style.display = 'block';
+            } else {
+                document.getElementById('possessionChart').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching possession data:', error);
+            document.getElementById('possessionChart').style.display = 'none';
+        });
+
+    fetch(`/api/circle/${matchNumber}/`)
+        .then(response => response.json())
+        .then(circleData => {
+            if (circleData.error) {
+                document.getElementById('circleShotsChart').style.display = 'none';
+            } else if (Object.keys(circleData).length > 0) {
+                fetch(`/api/shots/${matchNumber}/`)
+                    .then(response => response.json())
+                    .then(shotsData => {
+                        if (shotsData.error) {
+                            document.getElementById('circleShotsChart').style.display = 'none';
+                        } else if (Object.keys(shotsData).length > 0) {
+                            renderCircleShotsChart(circleData, shotsData);
+                            document.getElementById('circleShotsChart').style.display = 'block';
+                        } else {
+                            document.getElementById('circleShotsChart').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching shots data:', error);
+                        document.getElementById('circleShotsChart').style.display = 'none';
+                    });
+            } else {
+                document.getElementById('circleShotsChart').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching circle data:', error);
+            document.getElementById('circleShotsChart').style.display = 'none';
+        });
+
+    fetch(`/api/pc/${matchNumber}/`)
+        .then(response => response.json())
+        .then(pcData => {
+            if (pcData.error) {
+                document.getElementById('pcPsChart').style.display = 'none';
+            } else if (Object.keys(pcData).length > 0) {
+                fetch(`/api/ps/${matchNumber}/`)
+                    .then(response => response.json())
+                    .then(psData => {
+                        if (psData.error) {
+                            document.getElementById('pcPsChart').style.display = 'none';
+                        } else if (Object.keys(psData).length > 0) {
+                            renderPcPsChart(pcData, psData);
+                            document.getElementById('pcPsChart').style.display = 'block';
+                        } else {
+                            document.getElementById('pcPsChart').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching ps data:', error);
+                        document.getElementById('pcPsChart').style.display = 'none';
+                    });
+            } else {
+                document.getElementById('pcPsChart').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching pc data:', error);
+            document.getElementById('pcPsChart').style.display = 'none';
+        });
+
+    fetch(`/api/card/${matchNumber}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('cardChart').style.display = 'none';
+            } else if (Object.keys(data).length > 0) {
+                renderCardChart(data);
+                document.getElementById('cardChart').style.display = 'block';
+            } else {
+                document.getElementById('cardChart').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching card data:', error);
+            document.getElementById('cardChart').style.display = 'none';
+        });
+}
+
+
+        function renderGoalChart(data) {
+            const canvas = document.getElementById('goalChart');
+            const ctx = canvas.getContext('2d');
+
+            const team1Data = data.map(item => ({
+                label: item.team1_name,
+                data: [item.team1_FG, item.team1_PG, item.team1_total],
+                backgroundColor: 'rgba(0, 102, 204, 0.5)',
+                borderColor: 'rgba(0, 102, 204, 1)',
+                borderWidth: 1
+            }));
+
+            const team2Data = data.map(item => ({
+                label: item.team2_name,
+                data: [item.team2_FG, item.team2_PG, item.team2_total],
+                backgroundColor: 'rgba(204, 0, 0, 0.5)',
+                borderColor: 'rgba(204, 0, 0, 1)',
+                borderWidth: 1
+            }));
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Field Goals', 'Penalty Goals', 'Total Goals'],
+                    datasets: [...team1Data, ...team2Data]
+                },
+                options: {
+                    scales: {
+                        x: { stacked: false },
+                        y: { stacked: false }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Goal Comparison'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPossessionChart(data) {
+            const canvas = document.getElementById('possessionChart');
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Possession Percentage'],
+                    datasets: [
+                        {
+                            label: data.team1_name,
+                            data: [data.team1_possession_percentage],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: data.team2_name,
+                            data: [data.team2_possession_percentage],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Possession Percentage Comparison'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCircleShotsChart(circleData, shotsData) {
+            const canvas = document.getElementById('circleShotsChart');
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Circle Entries', 'Shots on Goal'],
+                    datasets: [
+                        {
+                            label: circleData.team1_name,
+                            data: [circleData.team1_circle, shotsData.team1_shots],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: circleData.team2_name,
+                            data: [circleData.team2_circle, shotsData.team2_shots],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Circle Entries and Shots Comparison'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPcPsChart(pcData, psData) {
+            const canvas = document.getElementById('pcPsChart');
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Penalty Corners', 'Penalty Strokes'],
+                    datasets: [
+                        {
+                            label: pcData.team1_name,
+                            data: [pcData.team1_pc, psData.team1_ps],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: pcData.team2_name,
+                            data: [pcData.team2_pc, psData.team2_ps],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Penalty Corners and Strokes Comparison'
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCardChart(cardData) {
+            const canvas = document.getElementById('cardChart');
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Green-Yellow Cards', 'Red Cards'],
+                    datasets: [
+                        {
+                            label: cardData.team1_name,
+                            data: [cardData.team1_gy, cardData.team1_r],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: cardData.team2_name,
+                            data: [cardData.team2_gy, cardData.team2_r],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Cards Comparison'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

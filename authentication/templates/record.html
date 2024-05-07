@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Analysis - Record Data</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 5%;
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .logo {
+        height: 50px;
+    }
+
+    .logout-link {
+        text-decoration: none;
+        color: black;
+        font-weight: bold;
+    }
+
+    .page-title {
+        text-align: center;
+        color: #333;
+        margin: 20px 0;
+    }
+
+    .metrics-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        padding: 20px;
+    }
+
+    .metric-card {
+        width: calc(50% - 40px);
+        height: 200px;
+        margin: 20px;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        text-decoration: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+        color: #fff; /* White text for the metric name */
+    }
+
+    /* Semi-transparent overlay for better readability */
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Metric name always visible when not hovered */
+    .metric-card span {
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Descriptive text overlay shown on hover */
+    .metric-card:hover::after {
+        content: attr(data-hovertext);
+        background-color: rgba(255, 255, 255, 0.9); /* White background for hover text */
+        color: #000; /* Black text on hover */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        font-size: 18px;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .metric-card {
+            width: calc(100% - 40px);
+        }
+        .header {
+            flex-direction: column;
+            padding: 10px;
+        }
+        .logout-link {
+            margin-top: 10px;
+        }
+    }
+</style>
+</head>
+<body>
+    <header class="header">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 50px;">
+        </a>
+
+        <a href="{% url 'match_analysis' %}" class="logout-link">Go Back</a>
+    </header>
+
+    <main class="content">
+        <h1 class="page-title">Record Match Data</h1>
+        <div class="metrics-container">
+            <a href="{% url 'ballpossession' %}" class="metric-card" data-hovertext="Click to record Ball Possesion percentage of each team in a particular match" style="background-image: url('{% static 'images/bp.webp' %}');"><span>Ball Possession</span></a>
+            <a href="{% url 'goal' %}" class="metric-card" data-hovertext="Click to record Shots on Target, Circle Penetration and Goal details of each team in a match" style="background-image: url('{% static 'images/goal.jpg' %}');"><span>Goal Move</span></a>
+            <a href="{% url 'penalty' %}" class="metric-card" data-hovertext="Click to record Penalty Corner, Penalty Stroke and Penalty Card details of each team in a match" style="background-image: url('{% static 'images/card.jpg' %}');"><span>Penalties</span></a>
+        </div>
+    </main>
+
+    <script>
+    </script>
+</body>
+</html>

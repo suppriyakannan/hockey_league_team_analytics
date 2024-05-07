@@ -1,0 +1,142 @@
+body {
+    background-color: #f8f9fa;
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
+  .navbar-brand {
+    margin-right: auto;
+    border-left: 5px;
+  }
+  
+  .navbar-nav {
+    margin-right: 1px;
+  }
+  
+  
+  .navbar-nav .nav-link {
+    font-size: 18px;
+  }
+  
+  .home-section {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .bg-image {
+    background-image: url('/hlteam/img/background.jpg'); /* Change the path to your background image */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+  }
+  
+  .home-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    color: white;
+  }
+  
+  .menu {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .menu a {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-right: 10px;
+    background-color: rgba(255, 255, 255, 0.5); /* White background with transparency */
+  }
+  
+  .menu a:hover {
+    background-color: rgba(255, 255, 255, 0.8); /* Lighter white background with transparency */
+  }
+  
+  .who-we-section {
+    background-color: #f0f0f0;
+    padding: 30px;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+  
+  .who-we-section h2 {
+    margin-bottom: 20px;
+  }
+  
+  .who-we-section .box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .who-we-section .box i {
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+  
+  .who-we-section .box p {
+    margin-bottom: 0;
+  }
+  
+  .contact-section {
+    background-color: #f0f0f0;
+    padding: 30px;
+    border-radius: 10px;
+  }
+  
+  .contact-section .row {
+    justify-content: center;
+  }
+  
+  .contact-section .container .col-md-3 {
+    text-align: left;
+  }
+  
+  .footer-section {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+  }
+  
+  .footer-section p {
+    margin-bottom: 0;
+  }
+  
+  .contact-icons {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .contact-icons .row .col-lg-3 {
+    text-align: center;
+  }
+  
+  .contact-icons .row .col-lg-3 p {
+    margin-top: 10px;
+  }
+  
+  .contact-icons a {
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .contact-icons a:hover {
+    color: #000;
+  }
+  

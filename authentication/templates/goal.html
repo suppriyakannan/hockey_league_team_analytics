@@ -1,0 +1,311 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Analysis - Record Data</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('{% static "images/ballp.webp" %}');
+            background-size: cover;
+            padding-top: 76px;
+        }
+        .navbar-brand img {
+            height: 40px;
+        }
+        .container, .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            margin: 5px;
+        }
+        .btn-circle-entry1, .btn-circle-entry2, .btn-shots1, .btn-shots2, .btn-fg, .btn-pg, .btn-remove {
+            padding: 5px 10px; font-size: 12px;
+        }
+        .instructions-container, .data-container {
+            display: none; /* Initially hidden */
+            background-color: #fefefe;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .instructions-container h4 {
+            margin-top: 0;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .btn-circle-entry1 { background-color: lightblue; }
+        .btn-circle-entry2 { background-color: rgb(104, 197, 228); }
+        .btn-shots1 { background-color: palevioletred; }
+        .btn-shots2 { background-color: rgb(212, 76, 122); }
+        .btn-fg { background-color: lightgreen; }
+        .btn-pg { background-color: rgb(109, 230, 109); }
+        .btn-remove { background-color: rgb(92, 206, 92); }
+        @media (max-width: 768px) {
+            .btn { padding: 5px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="#">
+        <img src="{% static 'images/logo.png' %}" alt="Logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Logout</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="javascript:history.back()">Back</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="text-center">Record Goal Move Data</h2>
+    <div class="form-container" id="formContainer">
+        <form method="post" id="recordForm" onsubmit="event.preventDefault(); showData();">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col">
+                    <label for="team1">Team 1</label>
+                    <select class="form-control" id="team1" name="team1" required>
+                        <option value="">Select Team 1</option>
+                        {% for team in teams %}
+                        <option value="{{ team.name }}">{{ team.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="team2">Team 2</label>
+                        <select class="form-control" id="team2" name="team2" required>
+                            <option value="">Select Team 2</option>
+                            {% for team in teams %}
+                            <option value="{{ team.name }}">{{ team.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="match_number">Match Number</label>
+                    <input type="number" class="form-control" id="match_number" name="match_number" placeholder="Enter Match Number" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="align-items: center;">Let's Record!</button>
+            </form>
+        </div>
+        <div class="instructions-container" id="instructionsContainer">
+            <h4>Instructions:</h4>
+            <ul>
+                <li><strong>C+</strong>: Add Circle Entry, <strong>C-</strong>: Remove Circle Entry.</li>
+                <li><strong>S+</strong>: Add Shot on Target, <strong>S-</strong>: Remove Shot on Target.</li>
+                <li><strong>FG</strong>: Add Field Goal, <strong>PG</strong>: Add Penalty Goal.</li>
+                <li><strong>FG-</strong>: Remove Field Goal, <strong>PG-</strong>: Remove Penalty Goal.</li>
+            </ul>
+        </div>
+        <div class="data-container" id="dataContainer">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th id="team1Name">Team 1</th>
+                            <th id="team2Name">Team 2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in "123456"|make_list %}
+                        <tr>
+                            <td rowspan="2">R{{ i }}</td>
+                            <td>
+                                <button class="btn btn-circle-entry1" data-action="team1_circle_increment">C+</button>
+                                <button class="btn btn-shots1" data-action="team1_shots_increment">S+</button>
+                                <button class="btn btn-circle-entry2" data-action="team1_circle_decrement">C-</button>
+                                <button class="btn btn-shots2" data-action="team1_shots_decrement">S-</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-circle-entry1" data-action="team2_circle_increment">C+</button>
+                                <button class="btn btn-shots1" data-action="team2_shots_increment">S+</button>
+                                <button class="btn btn-circle-entry2" data-action="team2_circle_decrement">C-</button>
+                                <button class="btn btn-shots2" data-action="team2_shots_decrement">S-</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button class="btn btn-fg" data-action="team1_fg_increment">FG</button>
+                                <button class="btn btn-pg" data-action="team1_pg_increment">PG</button>
+                                <button class="btn btn-remove" data-action="team1_fg_decrement">FG-</button>
+                                <button class="btn btn-remove" data-action="team1_pg_decrement">PG-</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-fg" data-action="team2_fg_increment">FG</button>
+                                <button class="btn btn-pg" data-action="team2_pg_increment">PG</button>
+                                <button class="btn btn-remove" data-action="team2_fg_decrement">FG-</button>
+                                <button class="btn btn-remove" data-action="team2_pg_decrement">PG-</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <!-- Results row -->
+                    <tfoot>
+                        <tr class="table-info">
+                            <th>Result</th>
+                            <td>Field Goal: <span class="team1_fg">0</span>, Penalty Goal: <span class="team1_pg">0</span>, Total: <span class="team1_total">0</span></td>
+                            <td>Field Goal: <span class="team2_fg">0</span>, Penalty Goal: <span class="team2_pg">0</span>, Total: <span class="team2_total">0</span></td>
+                        </tr>
+                        <tr class="table-info">
+                            <th>Circle/Shots</th>
+                            <td>Circle: <span class="team1_circle">0</span>, Shots: <span class="team1_shots">0</span></td>
+                            <td>Circle: <span class="team2_circle">0</span>, Shots: <span class="team2_shots">0</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button type="button" class="btn btn-primary" id="finishButton" style="align-items: center;">Finish</button>
+            </div>
+        </div>
+                </div>
+            </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('recordForm').onsubmit = function(event) {
+    event.preventDefault();
+    
+    // Check if the selected teams are the same
+    var team1 = document.getElementById('team1').value;
+    var team2 = document.getElementById('team2').value;
+    if (team1 === team2) {
+        alert('You cannot select the same team for both Team 1 and Team 2.');
+        return; // Stop submission
+    }
+
+    // Check if the match number already exists
+    var matchNumber = document.getElementById('match_number').value;
+    $.ajax({
+        url: '/check_match_number/',
+        method: 'POST',
+        data: {
+            'match_number': matchNumber,
+            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        success: function(response) {
+            if (response.exists) {
+                alert('Match number already exists. Please enter a different match number.');
+            } else {
+                showData(); // Proceed with showing data if validation passes
+            }
+        },
+        error: function() {
+            alert('There was a problem checking the match number.');
+        }
+    });
+};
+        function showData() {
+            document.getElementById('instructionsContainer').style.display = 'block';
+            document.getElementById('dataContainer').style.display = 'block';
+            document.getElementById('formContainer').style.display = 'none';
+        }
+    
+        $(document).ready(function () {
+        let tempData = {
+            team1_FG: 0,
+            team1_PG: 0,
+            team2_FG: 0,
+            team2_PG: 0,
+            team1_total: 0,
+            team2_total: 0,
+            team1_circle: 0,
+            team1_shots: 0,
+            team2_circle: 0,
+            team2_shots: 0
+        };
+
+        function updateDisplay() {
+            $('.team1_fg').text(tempData.team1_FG);
+            $('.team1_pg').text(tempData.team1_PG);
+            $('.team1_total').text(tempData.team1_total);
+            $('.team1_circle').text(tempData.team1_circle);
+            $('.team1_shots').text(tempData.team1_shots);
+            $('.team2_fg').text(tempData.team2_FG);
+            $('.team2_pg').text(tempData.team2_PG);
+            $('.team2_total').text(tempData.team2_total);
+            $('.team2_circle').text(tempData.team2_circle);
+            $('.team2_shots').text(tempData.team2_shots);
+        }
+
+        $('button[data-action]').click(function() {
+            let action = $(this).attr('data-action');
+            let increment = !action.includes('decrement');
+
+            if (action.includes('team1')) {
+                tempData.team1_FG += action.includes('fg') ? (increment ? 1 : -1) : 0;
+                tempData.team1_PG += action.includes('pg') ? (increment ? 1 : -1) : 0;
+                tempData.team1_circle += action.includes('circle') ? (increment ? 1 : -1) : 0;
+                tempData.team1_shots += action.includes('shots') ? (increment ? 1 : -1) : 0;
+            } else if (action.includes('team2')) {
+                tempData.team2_FG += action.includes('fg') ? (increment ? 1 : -1) : 0;
+                tempData.team2_PG += action.includes('pg') ? (increment ? 1 : -1) : 0;
+                tempData.team2_circle += action.includes('circle') ? (increment ? 1 : -1) : 0;
+                tempData.team2_shots += action.includes('shots') ? (increment ? 1 : -1) : 0;
+            }
+
+            tempData.team1_total = tempData.team1_FG + tempData.team1_PG;
+            tempData.team2_total = tempData.team2_FG + tempData.team2_PG;
+            updateDisplay();
+        });
+
+        $('#finishButton').click(function() {
+            let matchNumber = $('#match_number').val();
+            let team1 = $('#team1').val();
+            let team2 = $('#team2').val();
+
+            $.ajax({
+                url: '/save_goals/',
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    match_number: matchNumber,
+                    team1: team1,
+                    team2: team2,
+                    team1_FG: tempData.team1_FG,
+                    team1_PG: tempData.team1_PG,
+                    team2_FG: tempData.team2_FG,
+                    team2_PG: tempData.team2_PG,
+                    team1_total: tempData.team1_total,
+                    team2_total: tempData.team2_total,
+                    team1_circle: tempData.team1_circle,
+                    team1_shots: tempData.team1_shots,
+                    team2_circle: tempData.team2_circle,
+                    team2_shots: tempData.team2_shots,
+                },
+                success: function (data) {
+                    alert('Goals saved successfully. Redirecting to record match data page.');
+                    window.location.href = '/record/'; // Redirect to the record page
+                },
+                error: function () {
+                    alert('Error saving goal data.');
+                }
+            });
+        });
+    });
+</script>
+    </body>
+    </html>

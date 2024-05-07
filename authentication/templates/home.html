@@ -1,0 +1,292 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insights on Hockey League Team Analytics</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+    background-color: #f8f9fa;
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
+  .navbar-brand {
+    margin-right: auto;
+    border-left: 5px;
+  }
+  
+  .navbar-nav {
+    margin-right: 1px;
+  }
+  
+  
+  .navbar-nav .nav-link {
+    font-size: 18px;
+  }
+  
+  .home-section {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .bg-image {
+    background-image: url("{% static '/images/background.jpg' %}"); /* Change the path to your background image */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+  }
+  
+  .home-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    color: white;
+  }
+  
+  .menu {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .menu a {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-right: 10px;
+    background-color: rgba(255, 255, 255, 0.5); /* White background with transparency */
+  }
+  
+  .menu a:hover {
+    background-color: rgba(255, 255, 255, 0.8); /* Lighter white background with transparency */
+  }
+  
+  .who-we-section {
+    background-color: #f0f0f0;
+    padding: 30px;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+  
+  .who-we-section h2 {
+    margin-bottom: 20px;
+  }
+  
+  .who-we-section .box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .who-we-section .box i {
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+  
+  .who-we-section .box p {
+    margin-bottom: 0;
+  }
+  
+  .contact-section {
+    background-color: #f0f0f0;
+    padding: 30px;
+    border-radius: 10px;
+  }
+  
+  .contact-section .row {
+    justify-content: center;
+  }
+  
+  .contact-section .container .col-md-3 {
+    text-align: left;
+  }
+  
+  .footer-section {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+  }
+  
+  .footer-section p {
+    margin-bottom: 0;
+  }
+  
+  .contact-icons {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .contact-icons .row .col-lg-3 {
+    text-align: center;
+  }
+  
+  .contact-icons .row .col-lg-3 p {
+    margin-top: 10px;
+  }
+  
+  .contact-icons a {
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .contact-icons a:hover {
+    color: #000;
+  }
+  
+    /* Add space between menu items */
+    .navbar-nav .nav-link {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+
+<body >
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg bg-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'home' %}"><img src="{% static '/images/ahl.png' %}" alt="Logo" width="50"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="{% url 'match_analysis' %}"><i class="fas fa-chart-line"></i>  Analyze Match</a></li>
+          <li class="nav-item"><a class="nav-link" href="predict.html"><i class="fas fa-chart-pie"></i>  Prediction</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'predict' %}"><i class="fas fa-users"></i>  Visualization</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'standings' %}"><i class="fas fa-trophy"></i>  Standings</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'injury_dashboard' %}"><i class="fas fa-notes-medical"></i>  Track Injuries</a></li>
+          <li class="nav-item"><a class="nav-link" href="{%url 'login'%}"><i class="fas fa-sign-out-alt"></i>  Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Home Section -->
+  <section id="home" class="home-section text-center section">
+    <div class="bg-image">
+      <div class="overlay"></div>
+      <div class="home-content">
+        <h2 class="display-4 text-white">Insights on Hockey League Team Analytics</h2>
+        <hr class="my-4">
+        <p>Explore the different functionalities and analyze team performance. Get ready for an amazing experience!</p>
+      </div>
+    </div>
+  </section>
+
+<!-- who are we Section -->
+<section id="who-we" class="who-we-section text-center section">
+  <div class="container section-content justify-content">
+    <h2>Who Are We</h2>
+    <p class="lead">"Insights on Hockey League Team Analytics" is a comprehensive project aimed at providing hockey teams with advanced tools and analytics to optimize their performance. Through modules like Match Analysis, Prediction, Visualization, Standings, and Injury Tracking, teams can gain valuable insights into player performance, game strategies, and overall team dynamics. By leveraging data-driven approaches, teams can make informed decisions, enhance player development, and improve their competitive edge in the dynamic landscape of hockey leagues.</p>
+    <div class="row justify-content-center">
+      <div class="col-md-2 mb-4">
+        <a href="{% url 'match_analysis' %}" class="text-decoration-none">
+          <div class="box">
+            <i class="fas fa-chart-line fa-3x mb-3"></i>
+            <p>Analyze Match</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 mb-4">
+        <a href="predict.html" class="text-decoration-none">
+          <div class="box">
+            <i class="fas fa-chart-pie fa-3x mb-3"></i>
+            <p>Prediction</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 mb-4">
+        <a href="team.html" class="text-decoration-none">
+          <div class="box">
+            <i class="fas fa-users fa-3x mb-3"></i>
+            <p>Visualization</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 mb-4">
+        <a href="{% url 'standings' %}" class="text-decoration-none">
+          <div class="box">
+            <i class="fas fa-trophy fa-3x mb-3"></i>
+            <p>Standings</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 mb-4">
+        <a href="{% url 'injury_dashboard' %}" class="text-decoration-none">
+          <div class="box">
+            <i class="fas fa-notes-medical fa-3x mb-3"></i>
+            <p>Track Injuries</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section text-center section">
+    <div class="container section-content">
+      <h2>Contact</h2>
+      <br>
+      <div class="contact-icons">
+        <div class="row">
+          <div class="col-lg-3 col-md-6 mb-4">
+            <a href="mailto:ahlcomcommittee@gamil.com" class="text-decoration-none">
+              <i class="fas fa-envelope fa-3x mb-3"></i>
+              <p>Email</p>
+            </a>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <a href="https://twitter.com/annahockleag" target="_blank" class="text-decoration-none">
+              <i class="fab fa-twitter fa-3x mb-3"></i>
+              <p>Twitter</p>
+            </a>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <a href="https://facebook.com/annahockeyleague" target="_blank" class="text-decoration-none">
+              <i class="fab fa-facebook fa-3x mb-3"></i>
+              <p>Facebook</p>
+            </a>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <a href="https://instagram.com/annahockeyleague" target="_blank" class="text-decoration-none">
+              <i class="fab fa-instagram fa-3x mb-3"></i>
+              <p>Instagram</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  
+    <!-- Footer Section -->
+    <footer class="footer-section text-center">
+      <div class="container">
+        <p>&copy; 2024 Insights on Hockey League Team Analytics. All Rights Reserved.</p>
+      </div>
+    </footer>
+  
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+  
+  </html>
+  

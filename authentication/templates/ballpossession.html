@@ -1,0 +1,358 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Analysis - Record Data</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+
+body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('{%static "/images/ballp.webp" %}');
+            background-size: cover;
+            padding-top: 76px;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+        .container, .timer-section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .timer, .percentage {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+        .percentage {
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        .team-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .team {
+            flex-basis: 45%;
+        }
+        /* Additional styles for team differentiation */
+#team1Details {
+    background-color: peachpuff;
+    border: 1px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#team2Details {
+    background-color: palegoldenrod;
+    border: 1px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+        @media (max-width: 768px) {
+            .team-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .team {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="{% url 'home' %}">
+        <img src="{% static '/images/ahl.png' %}" alt="Logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Logout</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="javascript:history.back()">Back</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+
+<h2>Record Ball Possession</h2>
+
+</div>
+<div class="container">
+    <h2 class="text-center">Record Goal Move Data</h2>
+    <div class="form-container" id="formContainer">
+        <form method="post" id="recordForm" onsubmit="event.preventDefault(); showData();">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col">
+                    <label for="team1">Team 1</label>
+                    <select class="form-control" id="team1" name="team1" required>
+                        <option value="">Select Team 1</option>
+                        {% for team in teams %}
+                        <option value="{{ team.name }}">{{ team.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="team2">Team 2</label>
+                        <select class="form-control" id="team2" name="team2" required>
+                            <option value="">Select Team 2</option>
+                            {% for team in teams %}
+                            <option value="{{ team.name }}">{{ team.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="match_number">Match Number</label>
+                    <input type="number" class="form-control" id="match_number" name="match_number" placeholder="Enter Match Number" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="align-items: center;">Let's Record!</button>
+            </form>
+        </div>
+<div class="timer-section hidden" id="timerSection">
+    <div>
+    {%csrf_token%}
+    <div class="team-container">
+        <div class="team" id="team1Details">
+            <h3 id="team1Name">Team 1</h3>
+            <div id="team1Timer" class="timer">00:00:00</div>
+            <div id="team1Percentage" style="color:palevioletred;" class="percentage"></div>
+        </div>
+        <div class="team" id="team2Details">
+            <h3 id="team2Name">Team 2</h3>
+            <div id="team2Timer" class="timer">00:00:00</div>
+            <div id="team2Percentage" style="color: darkgoldenrod ; " class="percentage"></div>
+        </div>
+    </div>
+<br>
+    <div>
+    <button style="background-color: palegreen; color:black; border: palegreen; " class="btn btn-primary" id="startBtn" onclick="startTimer()">Start</button>
+    <button style="background-color: palegoldenrod; color:black; border: palegoldenrod" class="btn btn-primary" id="pauseBtn" onclick="pauseTimer()">Pause</button>
+    <button style="background-color: paleturquoise; color: black; border: paleturquoise; " class="btn btn-primary" id="switchBtn" onclick="switchTimer()">Switch</button>
+</div>
+</div>
+<br>
+<div>
+    <button  style="background-color: lightcoral; color: black; border:lightcoral;" class="btn btn-primary" id="finishBtn" onclick="finishRecording()">Calculate Possession</button>
+    <button style="background-color: lightcoral; color: black; border:lightcoral;" class="btn btn-primary" id="storeDataBtn">Store Possession Data</button>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+            document.getElementById('recordForm').onsubmit = function(event) {
+    event.preventDefault();
+    
+    // Check if the selected teams are the same
+    var team1 = document.getElementById('team1').value;
+    var team2 = document.getElementById('team2').value;
+    if (team1 === team2) {
+        alert('You cannot select the same team for both Team 1 and Team 2.');
+        return; // Stop submission
+    }
+
+    // Check if the match number already exists
+    var matchNumber = document.getElementById('match_number').value;
+    $.ajax({
+        url: '/check_match_number2/',
+        method: 'POST',
+        data: {
+            'match_number': matchNumber,
+            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        success: function(response) {
+            if (response.exists) {
+                alert('Match number already exists. Please enter a different match number.');
+            } else {
+                showData(); // Proceed with showing data if validation passes
+            }
+        },
+        error: function() {
+            alert('There was a problem checking the match number.');
+        }
+    });
+};
+function showData() {
+            document.getElementById('timerSection').style.display = 'block';
+            document.getElementById('formContainer').style.display = 'none';
+        }
+
+    let currentTimer = 1;
+    let timer1 = 0, timer2 = 0;
+    let interval = null;
+
+    function submitForm(event) {
+    event.preventDefault(); // Prevents the default form submission
+
+    const team1Select = document.getElementById("team1");
+    const team2Select = document.getElementById("team2");
+    const team1Name = team1Select.selectedOptions[0].text;
+    const team2Name = team2Select.selectedOptions[0].text;
+
+    // Check if the same team is selected for both Team 1 and Team 2
+    if (team1Select.value === team2Select.value) {
+        // Show the custom modal instead of alert
+        $('#alertModal').modal('show');
+        return; // Stop the function from proceeding further
+    }
+
+    document.getElementById("team1Name").textContent = team1Name;
+    document.getElementById("team2Name").textContent = team2Name;
+
+    team1Select.disabled = true;
+    team2Select.disabled = true;
+    document.getElementById("match_number").disabled = true;
+    document.getElementById("recordBtn").disabled = true;
+
+    document.getElementById('timerSection').classList.remove('hidden');
+}
+
+    function startTimer() {
+        if (!interval) {
+            interval = setInterval(() => {
+                if (currentTimer === 1) {
+                    timer1++;
+                    document.getElementById("team1Timer").textContent = formatTime(timer1);
+                } else {
+                    timer2++;
+                    document.getElementById("team2Timer").textContent = formatTime(timer2);
+                }
+            }, 1000);
+        }
+    }
+    document.getElementById('storeDataBtn').addEventListener('click', function() {
+    // Retrieving values as before
+    const matchNumber = document.getElementById('match_number').value;
+    const team1Select = document.getElementById('team1');
+    const team2Select = document.getElementById('team2');
+    const team1Name = team1Select.options[team1Select.selectedIndex].text;
+    const team2Name = team2Select.options[team2Select.selectedIndex].text;
+    const team1Possession = document.getElementById('team1Percentage').textContent.replace('% Possession', '');
+    const team2Possession = document.getElementById('team2Percentage').textContent.replace('% Possession', '');
+
+    // Safely obtaining the CSRF token value
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Proceed with AJAX request
+    $.ajax({
+        url: '/record_possession/', // Ensure this URL is correct
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': csrfToken,
+            'match_number': matchNumber,
+            'team1_name': team1Name,
+            'team2_name': team2Name,
+            'team1_possession_percentage': team1Possession,
+            'team2_possession_percentage': team2Possession,
+        },
+        success: function(response) {
+            // Handle success
+            console.log(response);
+            $('#alertModal2').modal('show');
+            $('#alertModal2').on('hidden.bs.modal', function (e) {
+                    window.location.href = "{% url 'record' %}"; // Redirect to record.html after the modal is closed.
+                })
+        },
+        error: function(error) {
+            // Handle error
+            console.log(error);
+            alert('Please click on the "Calculate Possession" button then click on "Store Possession" button');
+        }
+    });
+});
+
+    function pauseTimer() {
+        clearInterval(interval);
+        interval = null;
+    }
+
+    function switchTimer() {
+        pauseTimer();
+        currentTimer = (currentTimer === 1) ? 2 : 1;
+        startTimer();
+    }
+
+    function finishRecording() {
+        pauseTimer();
+        const total = timer1 + timer2;
+        const team1Percent = (timer1 / total * 100).toFixed(2);
+        const team2Percent = (timer2 / total * 100).toFixed(2);
+
+        document.getElementById("team1Percentage").textContent = `${team1Percent}% Possession`;
+        document.getElementById("team2Percentage").textContent = `${team2Percent}% Possession`;
+
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("pauseBtn").disabled = true;
+        document.getElementById("switchBtn").disabled = true;
+        document.getElementById("finishBtn").disabled = true;
+    }
+
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+</script>
+<!-- Custom Alert Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alertModalLabel">Selection Error</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Both teams cannot be the same. Please select different teams.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="alertModal2" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alertModalLabel">Update Successful!</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          The Possession have been stored successfully.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</body>
+</html>

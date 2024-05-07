@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Metrics Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .navbar {
+            background-color: #fff;
+        }
+        .navbar-brand img {
+            height: 40px;
+        }
+        body {
+            padding-top: 56px;
+            background: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+        .sidebar {
+            height: 100vh;
+            width: 250px; /* Increased sidebar width */
+            position: fixed;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            left: 0;
+            top: 56px; /* Offset by the height of the navbar */
+            bottom: 0;
+            overflow-y: auto;
+            border-right: 1px solid #ddd; /* Added border to separate sidebar from content */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Added shadow to give depth */
+        }
+        .sidebar a {
+            color: #337ab7; /* Changed link color to match Bootstrap's default */
+            text-decoration: none;
+            text-align: left;
+            padding: 10px;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            color: #23527c; /* Changed hover color to match Bootstrap's default */
+            background-color: #e9ecef;
+        }
+        .content {
+            padding-left: 250px; /* Adjusted content padding to match sidebar width */
+            padding-top: 20px;
+        }
+        .chart-container {
+            padding: 15px;
+        }
+        canvas {
+            width: 100%!important;
+            height: auto!important;
+        }
+        select,.go-back-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+       .hidden {
+            display: none;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+           .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+            }
+           .content {
+                padding-left: 0;
+                padding-top: 0;
+            }
+            h1 {
+                margin-top: 50px; /* Added top margin to create a gap */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/logo.png' %}" alt="Logo">
+        </a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:history.back()">Back</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="sidebar">
+        <a href="{% url 'dashboard' %}" class="btn btn-light btn-block">Team Visualization</a>
+        <a href="{% url 'stats_page' %}" class="btn btn-light btn-block">Team Comparison</a>
+        <a href="{% url 'game_metrics' %}" class="btn btn-light btn-block">Metric Comparison</a>
+    </div>
+    <div class="container-fluid content">
+        <div class="container">
+            <h1>Metric Comparison</h1>
+        <select id="team-selector" class="form-control my-3">
+            <option value="">Select a Team</option>
+            {% for team in teams %}
+                <option value="{{ team.id }}">{{ team.name }}</option>
+            {% endfor %}
+        </select>
+        <canvas id="shotsGoalsChart" width="800" height="400"></canvas>
+        <canvas id="circlesGoalsChart" width="800" height="400"></canvas>
+        <canvas id="possessionGoalsChart" width="800" height="400"></canvas>
+    </div>
+
+    <script>
+        const charts = {};
+    
+        document.getElementById('team-selector').addEventListener('change', function() {
+            const teamId = this.value;
+            if (!teamId) return;
+            fetch(`/api/fetch_game_data?team_id=${teamId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching data:', data.error);
+                        return;
+                    }
+                    updateCharts(data);
+                }).catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        });
+    
+        function updateCharts(data) {
+            createGroupedBarChart('shotsGoalsChart', data.matches, data.shots, data.goals, 'Shots', 'Goals');
+            createGroupedBarChart('circlesGoalsChart', data.matches, data.circles, data.goals, 'Circle Entries', 'Goals');
+            createDualAxisLineChart('possessionGoalsChart', data.matches, data.possessions, data.goals, 'Possession %', 'Goals');
+        }
+    
+        function createGroupedBarChart(chartId, labels, data1, data2, label1, label2) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            if (charts[chartId]) charts[chartId].destroy();
+            charts[chartId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label1,
+                        data: data1,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: label2,
+                        data: data2,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            stacked: false
+                        }
+                    }
+                }
+            });
+        }
+    
+        function createDualAxisLineChart(chartId, labels, data1, data2, label1, label2) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            if (charts[chartId]) charts[chartId].destroy();
+            charts[chartId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label1,
+                        data: data1,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        yAxisID: 'y1',
+                        fill: false,
+                    }, {
+                        label: label2,
+                        data: data2,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        yAxisID: 'y2',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            id: 'y1',
+                        },
+                        y2: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            id: 'y2',
+                            gridLines: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
