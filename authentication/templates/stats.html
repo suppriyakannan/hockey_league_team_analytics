@@ -1,77 +1,18 @@
-{%load static%}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Team Metrics Comparison</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        select, button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
         .navbar {
             background-color: #fff;
-        }
-        .navbar-brand img {
-            height: 40px;
-        }
-        body {
-            padding-top: 56px;
-            background: #f4f4f4;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-        }
-        .sidebar {
-            height: 100vh;
-            width: 250px; /* Increased sidebar width */
-            position: fixed;
-            background-color: #f8f9fa;
-            padding-top: 20px;
-            left: 0;
-            top: 56px; /* Offset by the height of the navbar */
-            bottom: 0;
-            overflow-y: auto;
-            border-right: 1px solid #ddd; /* Added border to separate sidebar from content */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Added shadow to give depth */
-        }
-        .sidebar a {
-            color: #337ab7; /* Changed link color to match Bootstrap's default */
-            text-decoration: none;
-            text-align: left;
-            padding: 10px;
-            display: block;
-            transition: background-color 0.3s ease;
-        }
-        .sidebar a:hover {
-            color: #23527c; /* Changed hover color to match Bootstrap's default */
-            background-color: #e9ecef;
-        }
-        .content {
-            padding-left: 250px; /* Adjusted content padding to match sidebar width */
-            padding-top: 20px;
-        }
-        .chart-container {
-            padding: 15px;
-        }
-        canvas {
-            width: 100%!important;
-            height: auto!important;
-        }
-        select,.go-back-btn {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-        }
-       .hidden {
-            display: none;
+            z-index: 1050; /* Ensures navbar is above other fixed elements */
         }
         h1 {
             color: #333;
@@ -79,25 +20,73 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .navbar-brand img {
+            height: 40px;
+        }
+        body {
+            padding-top: 56px; /* Ensure body content is pushed down the height of the navbar */
+        }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            left: 0;
+            top: 56px; /* Height of the navbar */
+            bottom: 0;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Lower z-index than navbar */
+        }
+        .sidebar a {
+            color: #337ab7;
+            text-decoration: none;
+            text-align: left;
+            padding: 10px;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            color: #23527c;
+            background-color: #e9ecef;
+        }
+        .content {
+            padding-left: 250px; /* Equal to the width of the sidebar */
+            padding-top: 20px;
+        }
+        .chart-container {
+            padding: 15px;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        select, .statsbutton {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
         @media (max-width: 768px) {
-           .sidebar {
+            .navbar {
+                padding-top: 0; /* Adjust padding when navbar collapses */
+            }
+            .sidebar {
                 width: 100%;
+                position: static; /* Sidebar becomes part of the normal flow under small screens */
                 height: auto;
-                position: relative;
-                top: 0;
             }
-           .content {
+            .content {
                 padding-left: 0;
-                padding-top: 0;
-            }
-            h1 {
-                margin-top: 50px; /* Added top margin to create a gap */
             }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <a class="navbar-brand" href="{% url 'home' %}">
             <img src="{% static 'images/ahl.png' %}" alt="Logo">
         </a>
@@ -115,16 +104,14 @@
             </ul>
         </div>
     </nav>
-<div class="sidebar">
+    <div class="sidebar">
         <a href="{% url 'dashboard' %}" class="btn btn-light btn-block">Team Visualization</a>
         <a href="{% url 'stats_page' %}" class="btn btn-light btn-block">Team Comparison</a>
         <a href="{% url 'game_metrics' %}" class="btn btn-light btn-block">Metric Comparison</a>
     </div>
-
-
     <div class="container-fluid content">
         <div class="container">
-        <h1>Metric Comparison</h1>
+        <h1>Metric Based Team Comparison</h1>
         <div>
             <label for="metric-select">Choose a metric:</label>
             <select id="metric-select">
@@ -136,7 +123,7 @@
                 <option value="ps">Penalty Strokes</option>
                 <option value="cards">Cards</option>
             </select>
-            <button onclick="updateChart()">Show Comparison</button>
+            <button class="statsbutton" onclick="updateChart()">Show Comparison</button>
         </div>
         <canvas id="statsChart" width="800" height="400"></canvas>
     </div>

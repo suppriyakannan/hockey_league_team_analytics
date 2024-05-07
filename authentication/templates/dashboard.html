@@ -4,21 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Hockey League Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
         .navbar {
             background-color: #fff;
+            z-index: 1050; /* Ensures navbar is above other fixed elements */
         }
         .navbar-brand img {
             height: 40px;
         }
         body {
-            padding-top: 56px;
-            background: #f4f4f4;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
+            padding-top: 56px; /* Ensure body content is pushed down the height of the navbar */
         }
         .sidebar {
             height: 100vh;
@@ -27,11 +27,12 @@
             background-color: #f8f9fa;
             padding-top: 20px;
             left: 0;
-            top: 56px;
+            top: 56px; /* Height of the navbar */
             bottom: 0;
             overflow-y: auto;
             border-right: 1px solid #ddd;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Lower z-index than navbar */
         }
         .sidebar a {
             color: #337ab7;
@@ -44,6 +45,13 @@
         .sidebar a:hover {
             color: #23527c;
             background-color: #e9ecef;
+        }
+        .content {
+            padding-left: 250px; /* Equal to the width of the sidebar */
+            padding-top: 20px;
+        }
+        .chart-container {
+            padding: 15px;
         }
         .content {
             padding-left: 250px;
@@ -97,10 +105,27 @@
                 margin-top: 50px;
             }
         }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        @media (max-width: 768px) {
+            .navbar {
+                padding-top: 0; /* Adjust padding when navbar collapses */
+            }
+            .sidebar {
+                width: 100%;
+                position: static; /* Sidebar becomes part of the normal flow under small screens */
+                height: auto;
+            }
+            .content {
+                padding-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <a class="navbar-brand" href="{% url 'home' %}">
             <img src="{% static 'images/ahl.png' %}" alt="Logo">
         </a>
@@ -122,9 +147,7 @@
         <a href="{% url 'dashboard' %}" class="btn btn-light btn-block">Team Visualization</a>
         <a href="{% url 'stats_page' %}" class="btn btn-light btn-block">Team Comparison</a>
         <a href="{% url 'game_metrics' %}" class="btn btn-light btn-block">Metric Comparison</a>
-    </div>
-
-    <div class="container-fluid content">
+    </div>    <div class="container-fluid content">
         <div class="container">
             <h1>Team Visualization Dashboard</h1>
             <select id="teamSelector" onchange="loadTeamData()">

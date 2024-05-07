@@ -43,7 +43,8 @@ urlpatterns = [
     path('api/stats/', views.get_stats, name='get-stats'),     # URL for the API to get stats
     path('game_metrics/', views.game_metrics, name='game_metrics'),
     path('api/fetch_game_data/', views.fetch_game_data, name='fetch-game-data'),
-    path('predict/', views.predict_view, name='predict_view'),
-    path('predict_result/', views.predict_result, name='predict_result'),
+    path('predict/<str:team_name>/', views.predict, name='team_predict'),
+    path('predict_result/<str:team_name>/', views.predict_result, name='team_predict_result'),
+    path('prediction/', views.prediction, name='prediction'),
 
 ]
