@@ -637,33 +637,34 @@ def fetch_game_data(request):
 from django.shortcuts import render
 from django.http import JsonResponse
 import joblib
-import numpy as np
+import os
 import pandas as pd
 
-model = joblib.load('authentication/model.pkl')
-preprocessor = joblib.load('authentication/preprocessor.pkl')
-
 def predict_view(request):
-    return render(request, 'templates/predict.html')
+    return render(request, 'predict_form.html')
 
 def predict_result(request):
     if request.method == 'POST':
         try:
+            team_name = request.POST.get('team_name').lower() + 'data'
+            model_path = os.path.join('models', f'{team_name}_model.pkl')
+            model = joblib.load(model_path)
+
+            # Using try-except to convert each field to int, providing default values where necessary
             data = {
                 'possession_percentage': float(request.POST.get('possession_percentage', 0)),
-                'circle_count': int(request.POST.get('circle_count', 0)),
-                'shots_count': int(request.POST.get('shots_count', 0)),
-                'field_goal': int(request.POST.get('field_goal', 0)),
-                'penalty_goal': int(request.POST.get('penalty_goal', 0)),
-                'penalty_corners': int(request.POST.get('penalty_corners', 0)),
-                'penalty_strokes': int(request.POST.get('penalty_strokes', 0))
+                'circle_count': int(request.POST.get('circle_count', 0) or 0),  # Default to 0 if empty
+                'shots_count': int(request.POST.get('shots_count', 0) or 0),
+                'field_goal': int(request.POST.get('field_goal', 0) or 0),
+                'penalty_goal': int(request.POST.get('penalty_goal', 0) or 0),
+                'penalty_corners': int(request.POST.get('penalty_corners', 0) or 0),
+                'penalty_strokes': int(request.POST.get('penalty_strokes', 0) or 0)
             }
             df = pd.DataFrame([data])
-            features = preprocessor.transform(df)
-            result = model.predict(features)[0]
+            result = model.predict(df)[0]
             result_text = 'Win' if result == 1 else 'Loss'
             return JsonResponse({'predicted_result': result_text})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     else:
-        return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
