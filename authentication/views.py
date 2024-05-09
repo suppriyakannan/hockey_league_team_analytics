@@ -488,11 +488,40 @@ def team_data(request, team_id):
         'labels': [f"Match {ps.match_number}" for ps in ps_data],
         'data': [ps.team1_ps if ps.team1_name == team.name else ps.team2_ps for ps in ps_data],
     }
+    team_wins = goal_data.filter(
+        Q(team1_name=team.name, team1_result=1) |
+        Q(team2_name=team.name, team2_result=1)
+    ).count()
+    team_losses = goal_data.filter(
+        Q(team1_name=team.name, team1_result=0) |
+        Q(team2_name=team.name, team2_result=0)
+    ).count()
+
+    # Calculate rank
+    team_win_counts = Goal.objects.values('team1_name', 'team2_name').annotate(
+        win_count=Count(
+            Case(
+                When(team1_result=1, then=Value(1)),
+                When(team2_result=1, then=Value(1)),
+                output_field=IntegerField()
+            )
+        )
+    ).order_by('-win_count')
+
+    team_rank = 1
+    for rank_data in team_win_counts:
+        if rank_data['team1_name'] == team.name or rank_data['team2_name'] == team.name:
+            break
+        team_rank += 1
+
     # Construct the response data
     data = {
         'team': {
             'name': team.name,
             'logo': team.logo.url if team.logo else None,
+            'wins': team_wins,
+            'losses': team_losses,
+            'rank': team_rank,
         },
         'goal_chart': goal_chart,
         'possession_chart': possession_chart,
@@ -647,21 +676,43 @@ def predict(request, team_name):
     context = {'team_name': team_name}
     return render(request, 'templates/predict.html', context)
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import joblib
+import os
+import pandas as pd
+
+@csrf_exempt  # For testing; remember to handle CSRF properly in production environments
 def predict_result(request, team_name):
     if request.method == 'POST':
         try:
-            model_path = os.path.join('models', f'{team_name.lower()}data_model.pkl')
+            team_name = team_name.lower() + 'data'
+            model_path = os.path.join('models', f'{team_name}_model.pkl')
             model = joblib.load(model_path)
 
+            # Safely parse input values, defaulting to 0 if conversion fails
+            def get_float(value, default=0.0):
+                try:
+                    return float(value) if value else default
+                except ValueError:
+                    return default
+
+            def get_int(value, default=0):
+                try:
+                    return int(value) if value else default
+                except ValueError:
+                    return default
+
             data = {
-                'possession_percentage': float(request.POST.get('possession_percentage', 0)),
-                'circle_count': int(request.POST.get('circle_count', 0)),
-                'shots_count': int(request.POST.get('shots_count', 0)),
-                'field_goal': int(request.POST.get('field_goal', 0)),
-                'penalty_goal': int(request.POST.get('penalty_goal', 0)),
-                'penalty_corners': int(request.POST.get('penalty_corners', 0)),
-                'penalty_strokes': int(request.POST.get('penalty_strokes', 0))
+                'possession_percentage': get_float(request.POST.get('possession_percentage')),
+                'circle_count': get_int(request.POST.get('circle_count')),
+                'shots_count': get_int(request.POST.get('shots_count')),
+                'field_goal': get_int(request.POST.get('field_goal')),
+                'penalty_goal': get_int(request.POST.get('penalty_goal')),
+                'penalty_corners': get_int(request.POST.get('penalty_corners')),
+                'penalty_strokes': get_int(request.POST.get('penalty_strokes'))
             }
+
             df = pd.DataFrame([data])
             result = model.predict(df)[0]
             result_text = 'Win' if result == 1 else 'Loss'
@@ -670,3 +721,4 @@ def predict_result(request, team_name):
             return JsonResponse({'error': str(e)}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
