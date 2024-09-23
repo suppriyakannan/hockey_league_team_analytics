@@ -27,28 +27,6 @@
             background-color: rgba(0, 0, 0, 0.7);
             z-index: 1020; /* Below the navbar */
         }
-        .navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 10px 20px;
-            background-color: rgba(0, 0, 0, 0);
-            z-index: 1030;
-        }
-        .nav-link {
-            color: #fff;
-            margin-left: 20px;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-        .nav-link:hover {
-            color: #f8f9fa;
-            text-decoration: none;
-        }
         /* Full-height overlay for content, allowing for centering */
         .overlay {
             position: fixed;
@@ -91,8 +69,8 @@
 <div class="page-overlay"></div>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <a class="navbar-brand" href="{% url 'home'}">
-            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 50px;">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 60px;">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -100,10 +78,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Logout</a>
+                    <a class="nav-link" href="{% url 'home' %}"  style="color: #2b2929; font-weight: bold;">Back</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:history.back()">Back</a>
+                    <a class="nav-link" href="{% url 'logout' %}" style="color: #2b2929; font-weight: bold;">Logout</a>
                 </li>
             </ul>
         </div>

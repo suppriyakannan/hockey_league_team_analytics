@@ -82,7 +82,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'home' %}">
-                <img src="{% static 'images/ahl.png' %}" alt="Logo">
+                <img src="{% static 'images/ahl.png' %}" alt="Logo" style="height: 50px;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -90,10 +90,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Logout</a>
+                        <a class="nav-link" href="{% url 'prediction' %}"  style="color: #2b2929; font-weight: bold;">Back</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="javascript:history.back()">Back</a>
+                        <a class="nav-link" href="{% url 'logout' %}" style="color: #2b2929; font-weight: bold;">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -159,7 +159,7 @@
                         modalSymbol.innerHTML = '<span class="symbol animate__animated animate__bounceIn">&#127942;</span>';
                         confetti({
                             particleCount: 100,
-                            spread: 70,
+                            spread: 200,
                             origin: { y: 0.6 }
                         });
                     } else {

@@ -46,5 +46,5 @@ urlpatterns = [
     path('predict/<str:team_name>/', views.predict, name='team_predict'),
     path('predict_result/<str:team_name>/', views.predict_result, name='team_predict_result'),
     path('prediction/', views.prediction, name='prediction'),
-
-]
+    path('logout/', views.logout_view, name='logout'),
+    ]

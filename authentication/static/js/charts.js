@@ -1,22 +1,30 @@
+// Global object to hold references to all chart instances
+var chartInstances = {};
+
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("DOM fully loaded and parsed");
     fetchDataAndRenderCharts();
     drawLegendPatterns();
+
+    // Existing event listener for dropdown changes
+    document.getElementById('matchFilter').addEventListener('change', fetchDataAndRenderCharts);
+
 });
 
+document.getElementById('matchFilter').addEventListener('change', fetchDataAndRenderCharts);
+
 function fetchDataAndRenderCharts() {
-    fetchChartData('/api/goals/', renderGoalChart);
-    fetchChartData('/api/possession/', renderPossessionChart);
-    fetchChartData('/api/cards/', renderCardChart);
-    fetchChartData('/api/circle/', data => {
-        fetch('/api/shots/')
+    const matchCount = document.getElementById('matchFilter').value;
+    fetchChartData(`/api/goals/?count=${matchCount}`, renderGoalChart);
+    fetchChartData(`/api/possession/?count=${matchCount}`, renderPossessionChart);
+    fetchChartData(`/api/cards/?count=${matchCount}`, renderCardChart);
+    fetchChartData(`/api/circle/?count=${matchCount}`, data => {
+        fetch(`/api/shots/?count=${matchCount}`)
             .then(response => response.json())
             .then(shotsData => renderCircleChart(data, shotsData))
             .catch(error => console.error('Error fetching shots data:', error));
     });
-    fetchChartData('/api/penalty/', renderPenaltyChart);
+    fetchChartData(`/api/penalty/?count=${matchCount}`, renderPenaltyChart);
 }
-
 
 function fetchChartData(url, renderFunction) {
     fetch(url)
@@ -113,7 +121,13 @@ function generatePattern(pattern, patternColor, teamColor) {
 
 function renderPossessionChart(data) {
     const ctx = document.getElementById('possessionChart').getContext('2d');
-    new Chart(ctx, {
+    // Destroy existing chart instance if it exists
+    if (chartInstances.possessionChart) {
+        chartInstances.possessionChart.destroy();
+    }
+
+    // Create a new chart instance and store it
+    chartInstances.possessionChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.map(item => `Match ${item.match_number}`),
@@ -133,17 +147,26 @@ function renderPossessionChart(data) {
         },
         options: {
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true
+                }
             }
         }
     });
 }
 
+
 function renderGoalChart(data) {
     const ctx = document.getElementById('goalChart').getContext('2d');
-    const team1DefaultColor = 'rgba(0, 102, 204, 0.5)'; // Dark blue color for Team 1
-    const team2DefaultColor = 'rgba(204, 0, 0, 0.5)'; // Dark red color for Team 2
-    new Chart(ctx, {
+    // Destroy existing chart instance if it exists
+    if (chartInstances.goalChart) {
+        chartInstances.goalChart.destroy();
+    }
+    
+    const team1DefaultColor = 'rgba(0, 102, 204, 0.5)';
+    const team2DefaultColor = 'rgba(204, 0, 0, 0.5)';
+    // Create a new chart instance and store it
+    chartInstances.goalChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.map(item => `Match ${item.match_number}`),
@@ -152,8 +175,8 @@ function renderGoalChart(data) {
                 data: data.map(item => item.team1_FG + item.team1_PG),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team1_name];
-                    const patternColor = team1DefaultColor; // Darker shade of background color
-                    const defaultColor = team1DefaultColor; // Default background color for Team 1
+                    const patternColor = team1DefaultColor;
+                    const defaultColor = team1DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -162,8 +185,8 @@ function renderGoalChart(data) {
                 data: data.map(item => item.team2_FG + item.team2_PG),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team2_name];
-                    const patternColor = team2DefaultColor; // Darker shade of background color
-                    const defaultColor = team2DefaultColor; // Default background color for Team 2
+                    const patternColor = team2DefaultColor;
+                    const defaultColor = team2DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -181,9 +204,15 @@ function renderGoalChart(data) {
 
 function renderCardChart(data) {
     const ctx = document.getElementById('cardChart').getContext('2d');
+    // Destroy existing chart instance if it exists
+    if (chartInstances.cardChart) {
+        chartInstances.cardChart.destroy();
+    }
+
     const team1DefaultColor = 'rgba(0, 153, 0, 0.5)'; // Dark green color for Team 1
     const team2DefaultColor = 'rgba(204, 102, 0, 0.5)'; // Dark orange color for Team 2
-    new Chart(ctx, {
+    // Create a new chart instance and store it
+    chartInstances.cardChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.map(item => `Match ${item.match_number}`),
@@ -192,8 +221,8 @@ function renderCardChart(data) {
                 data: data.map(item => item.team1_gy + item.team1_r),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team1_name];
-                    const patternColor = team1DefaultColor; // Darker shade of background color
-                    const defaultColor = team1DefaultColor; // Default background color for Team 1
+                    const patternColor = team1DefaultColor;
+                    const defaultColor = team1DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -202,8 +231,8 @@ function renderCardChart(data) {
                 data: data.map(item => item.team2_gy + item.team2_r),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team2_name];
-                    const patternColor = team2DefaultColor; // Darker shade of background color
-                    const defaultColor = team2DefaultColor; // Default background color for Team 2
+                    const patternColor = team2DefaultColor;
+                    const defaultColor = team2DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -220,9 +249,15 @@ function renderCardChart(data) {
 
 function renderCircleChart(data, shotsData) {
     const ctx = document.getElementById('circleChart').getContext('2d');
+    // Destroy existing chart instance if it exists
+    if (chartInstances.circleChart) {
+        chartInstances.circleChart.destroy();
+    }
+
     const team1DefaultColor = 'rgba(204, 0, 204, 0.5)'; // Dark magenta color for Team 1
     const team2DefaultColor = 'rgba(0, 102, 204, 0.5)'; // Dark blue color for Team 2
-    new Chart(ctx, {
+    // Create a new chart instance and store it
+    chartInstances.circleChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.map(item => `Match ${item.match_number}`),
@@ -231,8 +266,8 @@ function renderCircleChart(data, shotsData) {
                 data: data.map((item, index) => item.team1_circle + shotsData[index].team1_shots),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team1_name];
-                    const patternColor = team1DefaultColor; // Darker shade of background color
-                    const defaultColor = team1DefaultColor; // Default background color for Team 1
+                    const patternColor = team1DefaultColor;
+                    const defaultColor = team1DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -241,8 +276,8 @@ function renderCircleChart(data, shotsData) {
                 data: data.map((item, index) => item.team2_circle + shotsData[index].team2_shots),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team2_name];
-                    const patternColor = team2DefaultColor; // Darker shade of background color
-                    const defaultColor = team2DefaultColor; // Default background color for Team 2
+                    const patternColor = team2DefaultColor;
+                    const defaultColor = team2DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -259,9 +294,15 @@ function renderCircleChart(data, shotsData) {
 
 function renderPenaltyChart(data) {
     const ctx = document.getElementById('penaltyChart').getContext('2d');
+    // Destroy existing chart instance if it exists
+    if (chartInstances.penaltyChart) {
+        chartInstances.penaltyChart.destroy();
+    }
+
     const team1DefaultColor = 'rgba(204, 102, 255, 0.5)'; // Dark lavender color for Team 1
     const team2DefaultColor = 'rgba(102, 0, 204, 0.5)'; // Dark purple color for Team 2
-    new Chart(ctx, {
+    // Create a new chart instance and store it
+    chartInstances.penaltyChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.map(item => `Match ${item.match_number}`),
@@ -270,8 +311,8 @@ function renderPenaltyChart(data) {
                 data: data.map(item => item.team1_pc + item.team1_ps),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team1_name];
-                    const patternColor = team1DefaultColor; // Darker shade of background color
-                    const defaultColor = team1DefaultColor; // Default background color for Team 1
+                    const patternColor = team1DefaultColor;
+                    const defaultColor = team1DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })
@@ -280,8 +321,8 @@ function renderPenaltyChart(data) {
                 data: data.map(item => item.team2_pc + item.team2_ps),
                 backgroundColor: data.map(item => {
                     const teamPattern = teamPatterns[item.team2_name];
-                    const patternColor = team2DefaultColor; // Darker shade of background color
-                    const defaultColor = team2DefaultColor; // Default background color for Team 2
+                    const patternColor = team2DefaultColor;
+                    const defaultColor = team2DefaultColor;
                     const pattern = teamPattern ? generatePattern(teamPattern, patternColor, defaultColor) : null;
                     return pattern ? pattern : defaultColor;
                 })

@@ -1,0 +1,23 @@
+
+<form class="form_control" action="{% url 'predict_performance' %}" method="GET">
+    <b>
+    Player Name: <input type="text" name="player_name"><br>
+    Dribbling: <input type="number" name="dribbling"><br>
+    Hit: <input type="number" name="hit"><br>
+    Sweep: <input type="number" name="sweep"><br>
+    Air Tapping: <input type="number" name="air_tapping"><br>
+    </b>
+    <button class="btn" type="submit">Predict</button>
+   </form>
+<script>
+    document.querySelector('.form_control').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const response = await fetch('/predict_performance/?' + new URLSearchParams(formData));
+        const data = await response.json();
+        alert(`${data.player_name}: ${data.prediction}`);
+       });
+       
+       
+       
+</script>   

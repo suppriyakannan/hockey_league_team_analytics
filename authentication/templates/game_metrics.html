@@ -18,14 +18,14 @@
             height: 40px;
         }
         body {
-            padding-top: 56px; /* Ensure body content is pushed down the height of the navbar */
+            padding-top: 100px; /* Ensure body content is pushed down the height of the navbar */
         }
         .sidebar {
             height: 100vh;
             width: 250px;
             position: fixed;
             background-color: #f8f9fa;
-            padding-top: 20px;
+            padding-top: 40px;
             left: 0;
             top: 56px; /* Height of the navbar */
             bottom: 0;
@@ -37,7 +37,7 @@
         .sidebar a {
             color: #337ab7;
             text-decoration: none;
-            text-align: left;
+            text-align: center;
             padding: 10px;
             display: block;
             transition: background-color 0.3s ease;
@@ -126,8 +126,8 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <a class="navbar-brand" href="{% url 'home' %}">
-            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+        <a class="navbar-brand" href="{% url 'home'%}">
+            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 60px;">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -135,14 +135,15 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Logout</a>
+                    <a class="nav-link" href="{% url 'dashboard' %}"  style="color: #2b2929; font-weight: bold;">Back</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:history.back()">Back</a>
+                    <a class="nav-link" href="{% url 'logout' %}" style="color: #2b2929; font-weight: bold;">Logout</a>
                 </li>
             </ul>
         </div>
     </nav>
+
     <div class="sidebar">
         <a href="{% url 'dashboard' %}" class="btn btn-light btn-block">Team Visualization</a>
         <a href="{% url 'stats_page' %}" class="btn btn-light btn-block">Team Comparison</a>
@@ -182,91 +183,57 @@
         });
     
         function updateCharts(data) {
-            createGroupedBarChart('shotsGoalsChart', data.matches, data.shots, data.goals, 'Shots', 'Goals');
-            createGroupedBarChart('circlesGoalsChart', data.matches, data.circles, data.goals, 'Circle Entries', 'Goals');
+            createDualAxisLineChart('shotsGoalsChart', data.matches, data.shots, data.goals, 'Shots', 'Goals');
+            createDualAxisLineChart('circlesGoalsChart', data.matches, data.circles, data.goals, 'Circle Entries', 'Goals');
             createDualAxisLineChart('possessionGoalsChart', data.matches, data.possessions, data.goals, 'Possession %', 'Goals');
         }
     
-        function createGroupedBarChart(chartId, labels, data1, data2, label1, label2) {
-            const ctx = document.getElementById(chartId).getContext('2d');
-            if (charts[chartId]) charts[chartId].destroy();
-            charts[chartId] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: label1,
-                        data: data1,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }, {
-                        label: label2,
-                        data: data2,
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            stacked: false
-                        },
-                        y: {
-                            stacked: false
-                        }
-                    }
-                }
-            });
-        }
-    
         function createDualAxisLineChart(chartId, labels, data1, data2, label1, label2) {
-            const ctx = document.getElementById(chartId).getContext('2d');
-            if (charts[chartId]) charts[chartId].destroy();
-            charts[chartId] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: label1,
-                        data: data1,
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        yAxisID: 'y1',
-                        fill: false,
-                    }, {
-                        label: label2,
-                        data: data2,
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        yAxisID: 'y2',
-                        fill: false,
-                    }]
+    const ctx = document.getElementById(chartId).getContext('2d');
+    if (charts[chartId]) charts[chartId].destroy();
+    charts[chartId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: label1,
+                data: data1,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)', // lighter fill color
+                yAxisID: 'y1',
+                fill: true, // enable fill
+            }, {
+                label: label2,
+                data: data2,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)', // lighter fill color
+                yAxisID: 'y2',
+                fill: true, // enable fill
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    id: 'y1',
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            id: 'y1',
-                        },
-                        y2: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            id: 'y2',
-                            gridLines: {
-                                drawOnChartArea: false,
-                            },
-                        }
-                    }
+                y2: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    id: 'y2',
+                    gridLines: {
+                        drawOnChartArea: false,
+                    },
                 }
-            });
+            }
         }
+    });
+}
     </script>
+    
 </body>
 </html>

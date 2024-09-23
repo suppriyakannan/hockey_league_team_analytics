@@ -10,67 +10,61 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-<style>
-            .navbar-brand img {
+    <style>
+        .navbar-brand img {
             height: 40px;
         }
-#legend {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-#legend-White Warriorz span { background-color: #e6f7ff; }  
-#legend-Blue Blazerz span { background-color: #f0e6ff; }   
-#legend-Green Griffinz span { background-color: #e6ffe6; } 
-#legend-Yellow Yakz span { background-color: #fffbe6; }     
-#legend-Red Ruffianz span { background-color: #ffe6e6; }    
-#legend-Violet Whalez span { background-color: #f5e6ff; }   
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-    margin-bottom: 5px;
-    padding: 5px;
-    border-radius: 4px;
-}
-
-.legend-item span {
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ccc;
-    margin-right: 5px;
-}
-
-.navbar-brand img {
+        #legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        #legend-White Warriorz span { background-color: #e6f7ff; }
+        #legend-Blue Blazerz span { background-color: #f0e6ff; }
+        #legend-Green Griffinz span { background-color: #e6ffe6; }
+        #legend-Yellow Yakz span { background-color: #fffbe6; }
+        #legend-Red Ruffianz span { background-color: #ffe6e6; }
+        #legend-Violet Whalez span { background-color: #f5e6ff; }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .legend-item span {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+        }
+        .navbar-brand img {
             height: 40px;
         }
-
         body {
-            padding-top: 80px; /* Padding to account for fixed navbar */
+            padding-top: 80px;
         }
         .accordion-button::after {
             position: absolute;
-            right: 20px; /* Position the arrow to the right */
+            right: 20px;
         }
         .accordion-button:not(.collapsed) {
             color: #0d6efd;
             background-color: #e9ecef;
         }
         canvas {
-            height: 49vh; /* Adjust if needed to fit within accordion content */
-            width: 100%; /* Full width to fit the container */
+            height: 49vh;
+            width: 100%;
         }
-
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <a class="navbar-brand" href="{%url 'home'%}">
-            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+        <a class="navbar-brand" href="{% url 'home'%}">
+            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 60px;">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -78,16 +72,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Logout</a>
+                    <a class="nav-link" href="{% url 'match_analysis' %}"  style="color: #2b2929; font-weight: bold;">Back</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:history.back()">Back</a>
+                    <a class="nav-link" href="{% url 'logout' %}" style="color: #2b2929; font-weight: bold;">Logout</a>
                 </li>
             </ul>
         </div>
     </nav>
+
     <div class="container-fluid mt-5">
-        
         <div class="row">
             <div class="col-md-3">
                 <div id="sidebar">
@@ -99,6 +93,20 @@
             </div>
             <div class="col-md-9">
                 <div id="content">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="matchFilter">Select Number of Matches:</label>
+                            <div class="input-group">
+                                <select class="form-control" id="matchFilter">
+                                    <option value="10">Last 10 Matches</option>
+                                    <option value="20">Last 20 Matches</option>
+                                    <option value="30">Last 30 Matches</option>
+                                    <option value="40">Last 40 Matches</option>
+                                    <option value="all">All Matches</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     <div class="container mt-4">
                         <div class="row">
                             <div class="col-md-12">
@@ -110,12 +118,11 @@
                                     <div class="legend-item" id="legend-Red Ruffianz"><span></span>Red Ruffianz</div>
                                     <div class="legend-item" id="legend-Violet Whalez"><span></span>Violet Whalez</div>
                                 </div>
-                                                                                                
                             </div>
                         </div>
                     </div>
-                    
-            
+
+                    </div>
                     <div id="accordion">
                         <div class="card">
                             <div class="card-header" id="headingOne">
@@ -141,8 +148,8 @@
                             </div>
                             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
                                 <div class="card-body">
-                                    <canvas id="possessionChart"></canvas>
-                                </div>
+                                    <canvas id="possessionChart"></canvas
+                                ></div>
                             </div>
                         </div>
                         <div class="card">
@@ -192,11 +199,9 @@
             </div>
         </div>
     </div>
-<!-- Other HTML elements -->
-
-<script src="{% static 'js/charts.js' %}?v=1.03"></script>  <!-- Notice the version bump to ensure no cache issues -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/charts.js' %}?v=1.03"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

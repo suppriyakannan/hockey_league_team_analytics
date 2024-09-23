@@ -23,20 +23,30 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 1;
   }
+  .navbar {
+  padding: 0.5rem 1rem; /* Adjust padding for the whole navbar */
+}
+
+.navbar-brand {
+  margin-right: 0; /* Removes the margin to the right of the logo */
+}
+
+.navbar-nav .nav-link {
+  margin-right: 10px; /* Ensures spacing between nav items */
+}
+
+/* If you need further left adjustment, you can modify the left padding of the container */
+.container-fluid {
+  padding-left: 15px; /* Adjusts padding to the left of the container inside the navbar */
+}
+
+/* Additional styles for responsive behavior and aesthetics */
+@media (max-width: 992px) {
   .navbar-brand {
-    margin-right: auto;
-    border-left: 5px;
+    margin-left: -15px; /* Adjust logo position in smaller screens */
   }
-  
-  .navbar-nav {
-    margin-right: 1px;
-  }
-  
-  
-  .navbar-nav .nav-link {
-    font-size: 18px;
-  }
-  
+}
+
   .home-section {
     position: relative;
     margin-bottom: 30px;
@@ -161,25 +171,27 @@
 
 <body >
 
-  <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg bg-light fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}"><img src="{% static '/images/ahl.png' %}" alt="Logo" width="50"></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" href="{% url 'match_analysis' %}"><i class="fas fa-chart-line"></i>  Analyze Match</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'prediction' %}"><i class="fas fa-chart-pie"></i>  Prediction</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-users"></i>  Visualization</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'standings' %}"><i class="fas fa-trophy"></i>  Standings</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'injury_dashboard' %}"><i class="fas fa-notes-medical"></i>  Track Injuries</a></li>
-          <li class="nav-item"><a class="nav-link" href="{%url 'login'%}"><i class="fas fa-sign-out-alt"></i>  Logout</a></li>
-        </ul>
-      </div>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand me-auto" href="{% url 'home' %}">
+      <img src="{% static '/images/ahl.png' %}" alt="Logo" width="50" style="margin-left: -15px;">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{% url 'match_analysis' %}"><i class="fas fa-chart-line"></i> Analyze Match</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'prediction' %}"><i class="fas fa-chart-pie"></i> Prediction</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-users"></i> Visualization</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'standings' %}"><i class="fas fa-trophy"></i> Standings</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'injury_dashboard' %}"><i class="fas fa-notes-medical"></i> Track Injuries</a></li>
+        <li class="nav-item"><a class="nav-link" href="{%url 'logout'%}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 
   <!-- Home Section -->
   <section id="home" class="home-section text-center section">
@@ -208,7 +220,7 @@
         </a>
       </div>
       <div class="col-md-2 mb-4">
-        <a href="predict.html" class="text-decoration-none">
+        <a href="{%url 'prediction' %}" class="text-decoration-none">
           <div class="box">
             <i class="fas fa-chart-pie fa-3x mb-3"></i>
             <p>Prediction</p>
@@ -216,7 +228,7 @@
         </a>
       </div>
       <div class="col-md-2 mb-4">
-        <a href="team.html" class="text-decoration-none">
+        <a href="{%url 'dashboard' %}" class="text-decoration-none">
           <div class="box">
             <i class="fas fa-users fa-3x mb-3"></i>
             <p>Visualization</p>

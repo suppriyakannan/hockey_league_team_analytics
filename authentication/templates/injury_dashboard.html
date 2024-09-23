@@ -10,143 +10,49 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            background-color: #f4f4f9;
-            padding-top: 100px; /* Enough space for the navbar */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-    .modal-content {
-        border-radius: 0.3rem;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        padding: 20px; /* Padding inside the modal for better spacing */
-    }
-    .modal-header {
-        background-color: #5dade2; /* Pleasant blue */
-        color: white;
-        border-bottom: 2px solid #3498db; /* Darker blue border for a subtle contrast */
-        border-top-left-radius: 0.3rem;
-        border-top-right-radius: 0.3rem;
-    }
-    .modal-body {
-        padding: 20px; /* Padding for spacing around form elements */
-        background: #ffffff; /* White background to lift elements off the modal's shadow */
-    }
-    .modal-footer {
-        border-top: none; /* Removes default border top */
-        padding: 20px;
-        background-color: #f8f9fa; /* Very light background to separate actions */
-    }
-    input, select, textarea {
-        border-radius: 0.25rem;
-        border: 1px solid #ced4da;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        margin-top: 0.5rem; /* Margin for spacing between form fields */
-        box-shadow: inset 0 1px 1px rgba(0,0,0,0.075); /* Subtle inset shadow for depth */
-    }
-    label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #343a40; /* Dark gray for text color for better readability */
-        font-weight: bold;
-    }
-    .btn-primary, .btn-secondary {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Shadow for 3D button effect */
-    }
-    .btn-primary:hover, .btn-secondary:hover {
-        transform: scale(1.03); /* Slight scale on hover for interaction feedback */
-    }
-        .btn-primary:hover {
-            background-color: #3498db;
-            border-color: #2980b9;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px; /* Adds extra space at the bottom */
-        }
-        table {
-            width: 100%;
-            background-color: #ffffff;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #e7e7e7; /* Soft gray border */
-            text-align: left;
-            font-size: 16px;
-        }
-        th {
-            background-color: #3498db; /* Darker blue for headers */
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f4f6;
-        }
-        tr:hover {
-            background-color: #daeaf1; /* Soft blue for hover */
-        }
-        .header {
-            padding: 10px 0;
-            color: #2c3e50; /* Dark blue for contrast */
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .btn-warning {
-            background-color: #f0ad4e;
-            color: white;
-            border-color: #eea236;
-        }
-        .btn-warning:hover {
-            background-color: #ec971f;
-            border-color: #d58512;
-        }
-        .btn-danger {
-            background-color: #d9534f;
-            color: white;
-            border-color: #d43f3a;
-        }
-        .btn-danger:hover {
-            background-color: #c9302c;
-            border-color: #ac2925;
-        }
-        .navbar-brand img {
-            height: 40px;
-        }
-        #injuryChartContainer {
-    width: 100%; /* Ensure the container is full width */
-    max-width: 800px; /* Maximum width */
-    height: 400px; /* Fixed height */
-    margin: 20px auto; /* Centering */
-    padding: 35px; /* Padding around the chart */
-    background: #fff; /* White background for visibility */
-    box-shadow: 0px 0px 10px #ccc; /* Subtle shadow for depth */
-}
-canvas {
-    width: 100% !important;
-    height: 100% !important; /* Ensuring the canvas respects the container's height */
-}
-    @media (max-width: 768px) {
-        .table-responsive {
-            border: 0;
-        }
-        th, td {
-            white-space: nowrap; /* Prevents text from wrapping */
-        }
-    }
-
-
+        body { background-color: #f4f4f9; padding-top: 100px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .modal-content { border-radius: 0.3rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2); padding: 20px; }
+        .modal-header { background-color: #5dade2; color: white; border-bottom: 2px solid #3498db; border-top-left-radius: 0.3rem; border-top-right-radius: 0.3rem; }
+        .modal-body { padding: 20px; background: #ffffff; }
+        .modal-footer { border-top: none; padding: 20px; background-color: #f8f9fa; }
+        input, select, textarea { border-radius: 0.25rem; border: 1px solid #ced4da; width: 100%; padding: 0.375rem 0.75rem; margin-top: 0.5rem; box-shadow: inset 0 1px 1px rgba(0,0,0,0.075); }
+        label { display: block; margin-bottom: 0.5rem; color: #343a40; font-weight: bold; }
+        .btn-primary, .btn-secondary { box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .btn-primary:hover, .btn-secondary:hover { transform: scale(1.03); }
+        .btn-primary:hover { background-color: #3498db; border-color: #2980b9; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; background-color: #ffffff; border-collapse: collapse; }
+        th, td { padding: 12px 15px; border: 1px solid #e7e7e7; text-align: left; font-size: 16px; }
+        th { background-color: #3498db; color: white; }
+        tr:nth-child(even) { background-color: #f2f4f6; }
+        tr:hover { background-color: #daeaf1; }
+        .header { padding: 10px 0; color: #2c3e50; font-size: 24px; font-weight: bold; text-align: center; }
+        .btn-warning { background-color: #f0ad4e; color: white; border-color: #eea236; }
+        .btn-warning:hover { background-color: #ec971f; border-color: #d58512; }
+        .btn-danger { background-color: #d9534f; color: white; border-color: #d43f3a; }
+        .btn-danger:hover { background-color: #c9302c; border-color: #ac2925; }
+        .navbar-brand img { height: 40px; }
+        #injuryChartContainer { width: 100%; max-width: 800px; height: 400px; margin: 20px auto; padding: 35px; background: #fff; box-shadow: 0px 0px 10px #ccc; }
+        canvas { width: 100% !important; height: 100% !important; }
+        .filter-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .filter-form { display: flex; align-items: center; }
+        .filter-form input[type="text"], .filter-form select { margin-right: 40px; padding: 6px 16px; border-radius: 4px; width: 340px; border: 1px solid #ccc; }
+        .filter-form button, .remove-filter { margin-right:20px; padding: 6px 12px; border-radius: 4px; min-width: 150px; background-color: #3498db; color: #fff; border: none; cursor: pointer; transition: background-color 0.3s ease; }
+        .filter-form button:hover, .remove-filter:hover { background-color: #2980b9; }
+        .remove-filter { background-color: #f0ad4e; margin-left: 20px; min-width: 200px; } /* Increased minimum width for better text fitting */
+        .remove-filter:hover { background-color: #ec971f; }
+        .pagination { display: flex; justify-content: center; margin-top: 20px; }
+        .pagination a, .pagination span { padding: 6px 12px; margin: 0 5px; border-radius: 4px; text-decoration: none; color: #333; background-color: #f5f5f5; border: 1px solid #ddd; }
+        .pagination a:hover { background-color: #e9e9e9; }
+        .pagination .current { background-color: #3498db; color: #fff; border-color: #3498db; }
+        @media (max-width: 768px) { .table-responsive { border: 0; } th, td { white-space: nowrap; } }
     </style>
-        
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <a class="navbar-brand" href="{% url 'home' %}">
-            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+        <a class="navbar-brand" href="{% url 'home'%}">
+            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 60px;">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -154,14 +60,15 @@ canvas {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Logout</a>
+                    <a class="nav-link" href="{% url 'home' %}"  style="color: #2b2929; font-weight: bold;">Back</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}">Back</a>
+                    <a class="nav-link" href="{% url 'logout' %}" style="color: #2b2929; font-weight: bold;">Logout</a>
                 </li>
             </ul>
         </div>
     </nav>
+
     <div class="container">
         <div class="header">Injury Dashboard</div>
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addInjuryModal">
@@ -179,8 +86,24 @@ canvas {
                     <div class="modal-body">
                         <form method="post" action="{% url 'injury_dashboard' %}">
                             {% csrf_token %}
-                            {{ form.as_p }}
-                            <div class="modal-footer">
+                            <label for="player">Player:</label>
+                            {{ form.player }}
+                            <label for="injury_type">Injury Type:</label>
+                            {{ form.injury_type }}
+                            <label for="injury_details">Details:</label>
+                            {{ form.injury_details }}
+                            <label for="body_part">Body Part:</label>
+                            {{ form.body_part }}
+                            <label for="status">Status:</label>
+                            <select id="status" name="status" class="form-control" required>
+                                <option value="">Select Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Treated">Treated</option>
+                                <option value="Recovering">Recovering</option>
+                            </select>
+                            <label for="date_reported">Date Reported:</label>
+                            <input type="date" id="date_reported" name="date_reported" class="form-control" min="2008-01-01" max="{{ current_date }}" required>
+                                                        <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Save changes</button>
                             </div>
@@ -189,8 +112,23 @@ canvas {
                 </div>
             </div>
         </div>
+
         <div class="mt-3">
-            <div class="table-responsive"> <!-- Responsive table wrapper -->
+            <div class="filter-container">
+                <form method="get" class="filter-form">
+                    <input type="text" name="search" placeholder="Search by player name..." value="{{ request.GET.search }}">
+                    <select name="status">
+                        <option value="">All Statuses</option>
+                        <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+                        <option value="Treated" {% if request.GET.status == "Treated" %}selected{% endif %}>Treated</option>
+                        <option value="Recovering" {% if request.GET.status == "Recovering" %}selected{% endif %}>Recovering</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <button type="button" class="btn btn-warning remove-filter" onclick="window.location.href='{{ request.path }}';">Remove Filter</button>
+                </form>
+            </div>
+            
+            <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -211,118 +149,116 @@ canvas {
                             <td>{{ injury.injury_details }}</td>
                             <td>{{ injury.status }}</td>
                             <td>
-                                <a href="{% url 'edit_injury_status' injury.id %}" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editStatusModal{{ injury.id }}">Edit Status</a>
-                                <!-- Button to Open Modal -->
+                                <a href="#" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editStatusModal{{ injury.id }}">Edit Status</a>
                                 <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteInjuryModal{{ injury.id }}">Delete</a>
                             </td>
                         </tr>
-    <div class="modal fade" id="editStatusModal{{ injury.id }}" tabindex="-1" role="dialog" aria-labelledby="editStatusModalLabel{{ injury.id }}" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-           <h5 class="modal-title" id="editStatusModalLabel{{ injury.id }}">Edit Status</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                         <span aria-hidden="true">&times;</span>
-                     </button>
-       </div>
-              <form method="post" action="{% url 'edit_injury_status' injury.id %}">
-        {% csrf_token %}
-        <div class="modal-body">
-       <div class="form-group">
-         <label for="status{{ injury.id }}">Status</label>
-         <input type="text" class="form-control" id="status{{ injury.id }}" name="status" value="{{ injury.status }}">
-             </div>
-      </div>
-           <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                         <button type="submit" class="btn btn-primary">Update</button>
-               </div>
-               </form>
+                        <!-- Edit Status Modal -->
+                        <div class="modal fade" id="editStatusModal{{ injury.id }}" tabindex="-1" role="dialog" aria-labelledby="editStatusModalLabel{{ injury.id }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editStatusModalLabel{{ injury.id }}">Edit Status</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form method="post" action="{% url 'edit_injury_status' injury.id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <label for="status">Status:</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="Pending" {% if injury.status == "Pending" %} selected {% endif %}>Pending</option>
+                                                <option value="Treated" {% if injury.status == "Treated" %} selected {% endif %}>Treated</option>
+                                                <option value="Recovering" {% if injury.status == "Recovering" %} selected {% endif %}>Recovering</option>
+                                            </select>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteInjuryModal{{ injury.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteInjuryModalLabel{{ injury.id }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteInjuryModalLabel{{ injury.id }}">Confirm Delete</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete this injury record for "{{ injury.player.name }}"?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form method="post" action="{% url 'delete_injury' injury.id %}">
+                                            {% csrf_token %}
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No injuries found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if is_paginated %}
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1&search={{ request.GET.search }}&status={{ request.GET.status }}">First</a>
+                            <a href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}&status={{ request.GET.status }}">Previous</a>
+                        {% endif %}
+                        
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}&status={{ request.GET.status }}">Next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}&search={{ request.GET.search }}&status={{ request.GET.status }}">Last</a>
+                        {% endif %}
+                    </span>
                 </div>
-            </div>
-            </div>
-                                            
-
-<!-- Delete Modal -->
-<div class="modal fade" id="deleteInjuryModal{{ injury.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteInjuryModalLabel{{ injury.id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteInjuryModalLabel{{ injury.id }}">Confirm Delete</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this injury record for "{{ injury.player.name }}"?
-            </div>
-            <div class="modal-footer">
-<!-- Inside your modal where the form is defined -->
-<form method="post" action="{% url 'delete_injury' injury.id %}">
-    {% csrf_token %}
-    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-    <button type="submit" class="btn btn-danger">Delete</button>
-</form>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
-
-
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-3" id="injuryChartContainer">
+        <div id="injuryChartContainer" class="mt-3">
             <h2 class="header">Injury Statistics</h2>
             <canvas id="injuryChart"></canvas>
         </div>
-        
+
         <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var ctx = document.getElementById('injuryChart').getContext('2d');
-    var jsonString = '{{ injury_data|safe }}';
-    console.log(jsonString);  // Debugging the JSON string
-    var injuryData = JSON.parse(jsonString);
+            document.addEventListener('DOMContentLoaded', function () {
+                var ctx = document.getElementById('injuryChart').getContext('2d');
+                var jsonString = '{{ injury_data|safe }}';
+                var injuryData = JSON.parse(jsonString);
+                var backgroundColors = ['#5dade2', '#3498db', '#2980b9', '#2471a3', '#1f618d', '#1a5276'];
+                var borderColors = ['#4a89c6', '#2874a6', '#1f5a85', '#154360', '#103448', '#0b2430'];
 
-    var backgroundColors = ['#5dade2', '#3498db', '#2980b9', '#2471a3', '#1f618d', '#1a5276'];
-    var borderColors = ['#4a89c6', '#2874a6', '#1f5a85', '#154360', '#103448', '#0b2430'];
+                var datasets = injuryData.map((item, index) => ({
+                    label: item.injury_type,
+                    data: [item.total],
+                    backgroundColor: backgroundColors[index % backgroundColors.length],
+                    borderColor: borderColors[index % borderColors.length],
+                    borderWidth: 1
+                }));
 
-    var datasets = injuryData.map((item, index) => ({
-        label: item.injury_type,
-        data: [item.total],
-        backgroundColor: backgroundColors[index % backgroundColors.length],
-        borderColor: borderColors[index % borderColors.length],
-        borderWidth: 1
-    }));
-
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Injuries'],
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-});
-
-            </script>
-            
-</body>
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: ['Injuries'], datasets: datasets },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
+                });
+            });
+        </script>
+    </body>
 </html>

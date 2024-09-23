@@ -41,7 +41,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <a class="navbar-brand" href="{% url 'home'%}">
-            <img src="{% static 'images/ahl.png' %}" alt="Logo">
+            <img src="{% static '/images/ahl.png' %}" alt="Logo" style="height: 60px;">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -49,10 +49,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Logout</a>
+                    <a class="nav-link" href="{% url 'visualize' %}"  style="color: #2b2929; font-weight: bold;">Back</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'visualize' %}">Back</a>
+                    <a class="nav-link" href="{% url 'logout' %}" style="color: #2b2929; font-weight: bold;">Logout</a>
                 </li>
             </ul>
         </div>

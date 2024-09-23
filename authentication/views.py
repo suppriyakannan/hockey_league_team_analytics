@@ -1,30 +1,39 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import logout
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
 from .models import CustomUser
+def is_superuser(user):
+    return user.is_superuser
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def logout_view(request):
+    logout(request)
+    return redirect('/login/')  # Assuming you have a URL named 'login'
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
 
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        try:
-            user = CustomUser.objects.get(email=email)
-            authenticated_user = authenticate(request, username=email, password=password)
-            if authenticated_user is not None:
-                login(request, authenticated_user)
-                # Redirect to a success page or wherever you want
-                return HttpResponseRedirect('/home/')
-            else:
-                # Authentication failed, handle it accordingly
-                return render(request, 'templates/login.html', {'error_message': 'Invalid email or password'})
-        except CustomUser.DoesNotExist:
-            # User does not exist, handle it accordingly
-            return render(request, 'templates/login.html', {'error_message': 'User does not exist'})
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('/home/')
+        else:
+            return render(request, 'templates/login.html', {'error': 'Invalid credentials'})
     else:
-        # Handle GET request for login page
-        return render(request, 'templates/login.html')
+        if request.user.is_authenticated:
+            return redirect('/home/')
+        return render(request, 'login.html')
 
+
+@login_required(login_url='/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/login/', redirect_field_name=None)
 def home_view(request):
     return render(request, 'templates/home.html')
 
@@ -203,40 +212,64 @@ def check_match_number2(request):
     return JsonResponse({'exists': exists})
 
 from django.http import JsonResponse
-from .models import Goal, PossessionData, Card, Circle, PC, PS
+from .models import Goal, PossessionData, Card, Circle, PC, PS, Shots
 
 def api_goals(request):
-    data = list(Goal.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_FG', 'team1_PG', 'team2_FG', 'team2_PG'))
+    count = request.GET.get('count', 'all')
+    data = Goal.objects.all().order_by('-match_number')
+    if count != 'all':
+        data = data[:int(count)]
+    data = list(data.values('match_number', 'team1_name', 'team2_name', 'team1_FG', 'team1_PG', 'team2_FG', 'team2_PG'))
     return JsonResponse(data, safe=False)
 
 def api_possession(request):
-    data = list(PossessionData.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_possession_percentage', 'team2_possession_percentage'))
+    count = request.GET.get('count', 'all')
+    data = PossessionData.objects.all().order_by('-match_number')
+    if count != 'all':
+        data = data[:int(count)]
+    data = list(data.values('match_number', 'team1_name', 'team2_name', 'team1_possession_percentage', 'team2_possession_percentage'))
     return JsonResponse(data, safe=False)
 
 def api_cards(request):
-    data = list(Card.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_gy', 'team1_r', 'team2_gy', 'team2_r'))
+    count = request.GET.get('count', 'all')
+    data = Card.objects.all().order_by('-match_number')
+    if count != 'all':
+        data = data[:int(count)]
+    data = list(data.values('match_number', 'team1_name', 'team2_name', 'team1_gy', 'team1_r', 'team2_gy', 'team2_r'))
     return JsonResponse(data, safe=False)
 
 def api_circle(request):
-    data = list(Circle.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_circle', 'team2_circle'))
-    return JsonResponse(data, safe=False)
-def api_shots(request):
-    data = list(Shots.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_shots', 'team2_shots'))
+    count = request.GET.get('count', 'all')
+    data = Circle.objects.all().order_by('-match_number')
+    if count != 'all':
+        data = data[:int(count)]
+    data = list(data.values('match_number', 'team1_name', 'team2_name', 'team1_circle', 'team2_circle'))
     return JsonResponse(data, safe=False)
 
+def api_shots(request):
+    count = request.GET.get('count', 'all')
+    data = Shots.objects.all().order_by('-match_number')
+    if count != 'all':
+        data = data[:int(count)]
+    data = list(data.values('match_number', 'team1_name', 'team2_name', 'team1_shots', 'team2_shots'))
+    return JsonResponse(data, safe=False)
 
 def api_penalty(request):
-    data = list(PC.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_pc', 'team2_pc'))
-    ps_data = list(PS.objects.all().values('match_number', 'team1_name', 'team2_name', 'team1_ps', 'team2_ps'))
-    # Combine PC and PS data
+    count = request.GET.get('count', 'all')
+    data = PC.objects.all().order_by('-match_number')
+    if count != 'all':
+        data = data[:int(count)]
+    data = list(data.values('match_number', 'team1_name', 'team2_name', 'team1_pc', 'team2_pc'))
+    ps_data = PS.objects.all().order_by('-match_number')
+    if count != 'all':
+        ps_data = ps_data[:int(count)]
+    ps_data = list(ps_data.values('match_number', 'team1_name', 'team2_name', 'team1_ps', 'team2_ps'))
     for pc, ps in zip(data, ps_data):
         pc.update({
             'team1_ps': ps['team1_ps'],
             'team2_ps': ps['team2_ps']
         })
     return JsonResponse(data, safe=False)
-
-
 from django.shortcuts import render
 from .models import PossessionData, Goal, Circle, Shots, PC, PS, Card
 from django.db import models
@@ -382,52 +415,62 @@ def standings(request):
     return render(request, 'standings.html', {'teams_ranked': teams_ranked})
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
 from .models import Injury
 from .forms import InjuryForm
-from django.db.models import Count
+from django.db.models import Q, Count
 import json
+from datetime import date
 
 def injury_dashboard(request):
-    if request.method == 'POST':
-        form = InjuryForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('injury_dashboard')
-    else:
-        form = InjuryForm()
+    query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    form = InjuryForm(request.POST or None)
 
-    injuries = Injury.objects.all()
-    injury_data = injuries.values('injury_type').annotate(total=Count('injury_type'))
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('injury_dashboard')
+
+    injuries_query = Injury.objects.all()
+
+    if query:
+        injuries_query = injuries_query.filter(player__name__icontains=query)
+    
+    if status_filter:
+        injuries_query = injuries_query.filter(status=status_filter)
+    
+    paginator = Paginator(injuries_query, 5)  # Show 5 injuries per page.
+    page_number = request.GET.get('page')
+    injuries = paginator.get_page(page_number)
+
+    injury_data = injuries.object_list.values('injury_type').annotate(total=Count('injury_type'))
     injury_data_json = json.dumps(list(injury_data))  # Prepare data for Chart.js
-
+    current_date = date.today().isoformat()
     return render(request, 'injury_dashboard.html', {
         'form': form,
         'injuries': injuries,
-        'injury_data': injury_data_json
+        'injury_data': injury_data_json,
+        'page_obj': injuries,  # Pass page object to the template for pagination controls
+        'is_paginated': True if injuries.paginator.num_pages > 1 else False,
+        'current_date': current_date
     })
-
-# views.py
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Injury
 
 def delete_injury(request, pk):
     injury = get_object_or_404(Injury, pk=pk)
     if request.method == 'POST':
         injury.delete()
         return redirect('injury_dashboard')
-    else:
-        # Optionally render a confirmation page if not using a modal
-        return render(request, 'confirm_delete.html', {'injury': injury})
 
 def edit_injury_status(request, pk):
     injury = get_object_or_404(Injury, pk=pk)
     if request.method == 'POST':
-        injury.status = request.POST.get('status')
-        injury.save()
+        status = request.POST.get('status')
+        if status:
+            injury.status = status
+            injury.save()
         return redirect('injury_dashboard')
-    return render(request, 'edit_injury_status_modal.html', {
-        'injury': injury
-    })
+    return render(request, 'edit_injury_status_modal.html', {'injury': injury})
+
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Sum, Q, F, When, Case, IntegerField, Value
@@ -436,104 +479,117 @@ from .models import Team, Goal, PossessionData, Circle, Shots, Card, PC, PS
 def dashboard(request):
     teams = Team.objects.all()
     return render(request, 'dashboard.html', {'teams': teams})
+from django.http import JsonResponse
 
 def team_data(request, team_id):
-    team = Team.objects.get(pk=team_id)
+    try:
+        team = Team.objects.get(pk=team_id)
 
-    # Prepare Goal data
-    goal_data = Goal.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    goal_chart = {
-        'labels': [f"Match {g.match_number}" for g in goal_data],
-        'data': [g.team1_total if g.team1_name == team.name else g.team2_total for g in goal_data],
-    }
+        # Get all teams and their total goals
+        teams_with_goals = []
+        teams = Team.objects.all()
+        for t in teams:
+            team_goals = Goal.objects.filter(team1_name=t.name).aggregate(
+                total=Sum(F('team1_FG') + F('team1_PG'))
+            )['total'] or 0
+            team_goals += Goal.objects.filter(team2_name=t.name).aggregate(
+                total=Sum(F('team2_FG') + F('team2_PG'))
+            )['total'] or 0
+            teams_with_goals.append({'team': t, 'total_goals': team_goals})
 
-        # Prepare Possession data
-    possession_data = PossessionData.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    possession_chart = {
-        'labels': [f"Match {p.match_number}" for p in possession_data],
-        'data': [p.team1_possession_percentage if p.team1_name == team.name else p.team2_possession_percentage for p in possession_data],
-    }
+        # Sort teams by total goals in descending order to determine ranks
+        teams_ranked = sorted(teams_with_goals, key=lambda x: x['total_goals'], reverse=True)
 
-        # Prepare Circle data
-    circle_data = Circle.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    circle_chart = {
-        'labels': [f"Match {c.match_number}" for c in circle_data],
-        'data': [c.team1_circle if c.team1_name == team.name else c.team2_circle for c in circle_data],
-    }
+        # Find rank of the selected team
+        team_rank = next((index for (index, d) in enumerate(teams_ranked, start=1) if d['team'].id == team.id), None)
 
-        # Prepare Shots data
-    shots_data = Shots.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    shots_chart = {
-        'labels': [f"Match {s.match_number}" for s in shots_data],
-        'data': [s.team1_shots if s.team1_name == team.name else s.team2_shots for s in shots_data],
-    }
+        # Gather data for the selected team's charts
+        goal_data = Goal.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        goal_chart = {
+            'labels': [f"Match {g.match_number}" for g in goal_data],
+            'data': [g.team1_total if g.team1_name == team.name else g.team2_total for g in goal_data]
+        }
+            # Prepare Possession data
+        possession_data = PossessionData.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        possession_chart = {
+            'labels': [f"Match {p.match_number}" for p in possession_data],
+            'data': [p.team1_possession_percentage if p.team1_name == team.name else p.team2_possession_percentage for p in possession_data],
+        }
 
-        # Prepare Card data
-    card_data = Card.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    card_chart = {
-        'labels': [f"Match {c.match_number}" for c in card_data],
-        'data': [c.team1_total if c.team1_name == team.name else c.team2_total for c in card_data],
-    }
+            # Prepare Circle data
+        circle_data = Circle.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        circle_chart = {
+            'labels': [f"Match {c.match_number}" for c in circle_data],
+            'data': [c.team1_circle if c.team1_name == team.name else c.team2_circle for c in circle_data],
+        }
 
-        # Prepare PC data
-    pc_data = PC.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    pc_chart = {
-        'labels': [f"Match {pc.match_number}" for pc in pc_data],
-        'data': [pc.team1_pc if pc.team1_name == team.name else pc.team2_pc for pc in pc_data],
-    }
+            # Prepare Shots data
+        shots_data = Shots.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        shots_chart = {
+            'labels': [f"Match {s.match_number}" for s in shots_data],
+            'data': [s.team1_shots if s.team1_name == team.name else s.team2_shots for s in shots_data],
+        }
 
-        # Prepare PS data
-    ps_data = PS.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
-    ps_chart = {
-        'labels': [f"Match {ps.match_number}" for ps in ps_data],
-        'data': [ps.team1_ps if ps.team1_name == team.name else ps.team2_ps for ps in ps_data],
-    }
-    team_wins = goal_data.filter(
-        Q(team1_name=team.name, team1_result=1) |
-        Q(team2_name=team.name, team2_result=1)
-    ).count()
-    team_losses = goal_data.filter(
-        Q(team1_name=team.name, team1_result=0) |
-        Q(team2_name=team.name, team2_result=0)
-    ).count()
+            # Prepare Card data
+        card_data = Card.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        card_chart = {
+            'labels': [f"Match {c.match_number}" for c in card_data],
+            'data': [c.team1_total if c.team1_name == team.name else c.team2_total for c in card_data],
+        }
 
-    # Calculate rank
-    team_win_counts = Goal.objects.values('team1_name', 'team2_name').annotate(
-        win_count=Count(
-            Case(
-                When(team1_result=1, then=Value(1)),
-                When(team2_result=1, then=Value(1)),
-                output_field=IntegerField()
+            # Prepare PC data
+        pc_data = PC.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        pc_chart = {
+            'labels': [f"Match {pc.match_number}" for pc in pc_data],
+            'data': [pc.team1_pc if pc.team1_name == team.name else pc.team2_pc for pc in pc_data],
+        }
+
+            # Prepare PS data
+        ps_data = PS.objects.filter(Q(team1_name=team.name) | Q(team2_name=team.name))
+        ps_chart = {
+            'labels': [f"Match {ps.match_number}" for ps in ps_data],
+            'data': [ps.team1_ps if ps.team1_name == team.name else ps.team2_ps for ps in ps_data],
+        }
+        team_wins = goal_data.filter(
+            Q(team1_name=team.name, team1_result=1) |
+            Q(team2_name=team.name, team2_result=1)
+        ).count()
+        team_losses = goal_data.filter(
+            Q(team1_name=team.name, team1_result=0) |
+            Q(team2_name=team.name, team2_result=0)
+        ).count()
+
+        # Calculate rank
+        team_win_counts = Goal.objects.values('team1_name', 'team2_name').annotate(
+            win_count=Count(
+                Case(
+                    When(team1_result=1, then=Value(1)),
+                    When(team2_result=1, then=Value(1)),
+                    output_field=IntegerField()
+                )
             )
-        )
-    ).order_by('-win_count')
+        ).order_by('-win_count')
 
-    team_rank = 1
-    for rank_data in team_win_counts:
-        if rank_data['team1_name'] == team.name or rank_data['team2_name'] == team.name:
-            break
-        team_rank += 1
+        data = {
+            'team': {
+                'name': team.name,
+                'logo': team.logo.url if team.logo else None,
+                'wins': team_wins,  # Calculate or retrieve similarly
+                'losses': team_losses,  # Calculate or retrieve similarly
+                'rank': team_rank,
+            },
+            'goal_chart': goal_chart,
+            'possession_chart': possession_chart,  # Prepare similarly
+            'circle_chart': circle_chart,  # Prepare similarly
+            'shots_chart': shots_chart,  # Prepare similarly
+            'card_chart': card_chart,  # Prepare similarly
+            'pc_chart': pc_chart,  # Prepare similarly
+            'ps_chart': ps_chart,  # Prepare similarly
+        }
 
-    # Construct the response data
-    data = {
-        'team': {
-            'name': team.name,
-            'logo': team.logo.url if team.logo else None,
-            'wins': team_wins,
-            'losses': team_losses,
-            'rank': team_rank,
-        },
-        'goal_chart': goal_chart,
-        'possession_chart': possession_chart,
-        'circle_chart': circle_chart,
-        'shots_chart': shots_chart,
-        'card_chart': card_chart,
-        'pc_chart': pc_chart,
-        'ps_chart': ps_chart,
-    }
-
-    return JsonResponse(data)
-
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 from django.http import JsonResponse
 from django.db.models import Sum
 from .models import Team, Goal, Shots, Circle, PossessionData, PC, PS, Card
